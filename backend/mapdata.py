@@ -1,5 +1,5 @@
-from node import Node
-from segment import Segment, Line
+from backend.node import Node
+from backend.segment import Segment, Line
 
 class MapData:
     def __init__(self):

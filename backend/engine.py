@@ -1,15 +1,16 @@
 import json
-from mapdata import MapData
-from node import Node
-from segment import Segment
-from segment import Line
+from backend.mapdata import MapData
+from backend.node import Node
+from backend.segment import Segment
+from backend.segment import Line
 
 class Engine:
     def __init__(self):
         """
-        Initialize the Engine with an empty MapData object.
+        Initialize the Engine with an empty MapData object and load data from map.json.
         """
         self.map_data = MapData()
+        self.import_from_json("backend/map.json")  # Wczytaj dane z map.json
 
     # Node Operations
     def add_node(self, node_id: str, label: str, coordinates: tuple, node_type: str):

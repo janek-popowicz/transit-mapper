@@ -1,6 +1,6 @@
 import tkinter as tk
 from tkinter import messagebox
-from engine import Engine
+from backend.engine import Engine
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
@@ -162,7 +162,7 @@ class MapEditor:
         except Exception as e:
             messagebox.showerror("Error", str(e))
 
-if __name__ == "__main__":
+def main():
     root = tk.Tk()
     app = MapEditor(root)
     root.mainloop()

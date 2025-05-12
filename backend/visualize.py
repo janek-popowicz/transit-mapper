@@ -1,5 +1,5 @@
 import matplotlib.pyplot as plt
-from engine import Engine
+from backend.engine import Engine
 
 def visualize_map(engine: Engine):
     """

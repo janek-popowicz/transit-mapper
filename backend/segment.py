@@ -1,4 +1,4 @@
-from node import Node
+from backend.node import Node
 
 class Segment:
     def __init__(self, start_node: Node, end_node: Node, lines: list, route: list):
