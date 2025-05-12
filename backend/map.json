@@ -1,0 +1,76 @@
+{
+  "nodes": [
+    {
+      "id": "1",
+      "label": "Station A",
+      "coordinates": [1, 0],
+      "type": "station"
+    },
+    {
+      "id": "2",
+      "label": "Station B",
+      "coordinates": [4, 0],
+      "type": "station"
+    },
+    {
+      "id": "3",
+      "label": "Station C",
+      "coordinates": [7, 1],
+      "type": "station"
+    },
+    {
+      "id": "4",
+      "label": "Station D",
+      "coordinates": [4, 4],
+      "type": "station"
+    }
+  ],
+  "segments": [
+    {
+      "start_node": "1",
+      "end_node": "2",
+      "lines": ["M1"],
+      "route": [
+        [1, 0],
+        [2, 0],
+        [3, 0],
+        [4, 0]
+      ]
+    },
+    {
+      "start_node": "2",
+      "end_node": "3",
+      "lines": ["M1"],
+      "route": [
+        [4, 0],
+        [5, 0],
+        [6, 0],
+        [7, 1]
+      ]
+    },
+    {
+      "start_node": "2",
+      "end_node": "4",
+      "lines": ["M2"],
+      "route": [
+        [4, 0],
+        [4, 1],
+        [4, 2],
+        [4, 3],
+        [4, 4]
+      ]
+    }
+  ],
+  "lines": [
+    {
+      "id": "M1",
+      "label": "Line 1",
+      "color": "#FF0000"
+    },
+    {
+      "id": "M2",
+      "label": "Line 2",
+      "color": "#00FF00"
+    }
+  ]
+}
