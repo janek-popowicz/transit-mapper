@@ -63,8 +63,9 @@ def get_map():
             "label": node.label,
             "coordinates": node.coordinates,
             "type": node.type,
+            "type_rotation": node.type_rotation,  # Dodano kąt obrotu
             "size": node.size,  # Dodano rozmiar węzła
-            "label_position": node.label_position,  # Dodano pozycję etykiety
+            "label_position": list(node.label_position),  # Konwersja tuple na listę
             "label_text_degree": node.label_text_degree  # Dodano obrót tekstu etykiety
         }
         for node in engine.map_data.get_all_nodes()

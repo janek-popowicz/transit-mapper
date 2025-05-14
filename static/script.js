@@ -84,17 +84,23 @@ function visualizeMap(data) {
         const x = node.coordinates[0] * scale + offsetX;
         const y = node.coordinates[1] * scale + offsetY;
 
+        // Rysowanie węzła
         ctx.beginPath();
-        ctx.arc(x, y, 5, 0, Math.PI * 2); // Rysowanie okręgu
+        ctx.arc(x, y, node.size/2, 0, Math.PI * 2); // Rozmiar węzła
         ctx.fillStyle = "blue";
         ctx.fill();
 
-        // Dodanie etykiety (odwrócenie osi Y wymaga specjalnego podejścia)
+        // Dodanie etykiety z uwzględnieniem pozycji i kąta obrotu
         ctx.save(); // Zapisz aktualny stan kontekstu
         ctx.scale(1, -1); // Przywróć normalną orientację tekstu
+        const labelX = x + (node.label_position[0] || 0); // Pozycja X etykiety
+        const labelY = -(y + (node.label_position[1] || 0)); // Pozycja Y etykiety (odwrócenie osi Y)
+        ctx.translate(labelX, labelY); // Przesunięcie do pozycji etykiety
+        ctx.rotate(((node.label_text_degree || 0) - 90) * Math.PI / 180); // Obrót tekstu
+
         ctx.font = "12px Arial";
         ctx.fillStyle = "black";
-        ctx.fillText(node.label, x + 8, -(y - 8)); // Odwrócenie współrzędnych Y dla tekstu
+        ctx.fillText(node.label, 0, 0); // Rysowanie tekstu
         ctx.restore(); // Przywróć poprzedni stan kontekstu
     });
 

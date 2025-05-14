@@ -6,39 +6,53 @@
       "label_position": [10, 10],
       "label_text_degree": 90,
       "coordinates": [1, 0],
-      "type": "station"
+      "type": "standard_black",
+      "size": 10
     },
     {
       "id": "2",
       "label": "Dworzec Wschodni",
-      "label_position": [10, 10],
+      "label_position": [0, -20],
       "label_text_degree": 90,
       "coordinates": [4, 0],
-      "type": "station"
+      "type": "standard_white",
+      "size": 15
     },
     {
       "id": "3",
       "label": "Praga",
-      "label_position": [10, 10],
+      "label_position": [10, -10],
       "label_text_degree": 90,
       "coordinates": [7, 1],
-      "type": "station"
+      "type": "standard_white",
+      "size": 15
     },
     {
       "id": "4",
       "label": "Stadion",
-      "label_position": [10, 10],
+      "label_position": [0, 10],
       "label_text_degree": 90,
       "coordinates": [4, 4],
-      "type": "station"
+      "type": "standard_black",
+      "size": 5
     },
     {
       "id": "5",
       "label": "Dworzec Centralny",
-      "label_position": [10, 10],
+      "label_position": [0, 10],
       "label_text_degree": 90,
       "coordinates": [-2, 0],
-      "type": "station"
+      "type": "standard_black",
+      "size": 10
+    },
+    {
+      "id": "6",
+      "label": "Lotnisko",
+      "label_position": [10, 0],
+      "label_text_degree": 90,
+      "coordinates": [15, 2],
+      "type": "standard_black",
+      "size": 5
     }
   ],
   "segments": [
@@ -85,6 +99,22 @@
         [4, 2],
         [4, 3],
         [4, 4]
+      ]
+    },
+    {
+      "start_node": "3",
+      "end_node": "6",
+      "lines": ["M2"],
+      "route": [
+        [7, 1],
+        [8, 2],
+        [9, 2],
+        [10, 1],
+        [11, 1],
+        [12, 1],
+        [13, 1],
+        [14, 2],
+        [15, 2]
       ]
     }
   ],

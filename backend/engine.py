@@ -131,12 +131,17 @@ class Engine:
             data = json.load(f)
         # Add nodes
         for node_data in data.get("nodes", []):
-            self.add_node(
-                node_data["id"],
-                node_data["label"],
-                tuple(node_data["coordinates"]),
-                node_data["type"]
+            node = Node(
+                id=node_data["id"],
+                label=node_data["label"],
+                coordinates=tuple(node_data["coordinates"]),
+                type=node_data["type"],
+                type_rotation=node_data.get("type_rotation", 0),  # Pobierz kąt obrotu
+                size=node_data.get("size", 10),  # Pobierz rozmiar węzła
+                label_position=tuple(node_data.get("label_position", (10, 10))),  # Pobierz pozycję etykiety
+                label_text_degree=node_data.get("label_text_degree", 90)  # Pobierz obrót tekstu
             )
+            self.map_data.add_node(node)
         # Add lines
         for line_data in data.get("lines", []):
             self.add_line(
