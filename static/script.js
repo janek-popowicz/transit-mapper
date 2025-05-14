@@ -29,6 +29,7 @@ canvas.addEventListener("mousedown", (e) => {
     isDragging = true;
     lastMouseX = e.clientX;
     lastMouseY = e.clientY;
+    canvas.style.cursor = "grabbing"; // Zmień kursor na "grabbing"
 });
 
 canvas.addEventListener("mousemove", (e) => {
@@ -45,10 +46,12 @@ canvas.addEventListener("mousemove", (e) => {
 
 canvas.addEventListener("mouseup", () => {
     isDragging = false;
+    canvas.style.cursor = "default"; // Przywróć kursor na "grab"
 });
 
 canvas.addEventListener("mouseleave", () => {
     isDragging = false;
+    canvas.style.cursor = "default"; // Przywróć kursor na "grab"
 });
 
 // Obsługa zoomu (scroll myszki)
@@ -58,14 +61,16 @@ canvas.addEventListener("wheel", (e) => {
     const zoomIntensity = 0.1; // Intensywność zoomu
     const zoom = e.deltaY < 0 ? 1 + zoomIntensity : 1 - zoomIntensity; // Powiększanie lub pomniejszanie
 
+    // Przelicz współrzędne kursora na współrzędne mapy
+    const mouseX = (e.clientX - canvas.width / 2) / scale - offsetX / scale;
+    const mouseY = (e.clientY - canvas.height / 2) / scale - offsetY / scale;
+
     // Aktualizacja skali
     scale *= zoom;
 
-    // Przesunięcie mapy, aby zoom był względem kursora
-    const mouseX = e.clientX - canvas.width / 2;
-    const mouseY = e.clientY - canvas.height / 2;
-    offsetX -= mouseX * (zoom - 1);
-    offsetY -= mouseY * (zoom - 1);
+    // Dostosuj przesunięcie, aby zoom był względem kursora
+    offsetX = -(mouseX * scale - (e.clientX - canvas.width / 2));
+    offsetY = -(mouseY * scale - (e.clientY - canvas.height / 2));
 
     fetchMapData(); // Ponowne rysowanie mapy z nową skalą
 });
@@ -87,6 +92,9 @@ window.addEventListener("resize", resizeCanvas);
 
 // Ustaw początkowy rozmiar canvas
 resizeCanvas();
+
+// Ustaw domyślny kursor na "grab"
+canvas.style.cursor = "default";
 
 // Rozpoczęcie pętli animacji
 requestAnimationFrame(updateMap);
