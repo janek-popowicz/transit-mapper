@@ -62,7 +62,10 @@ def get_map():
             "id": node.id,
             "label": node.label,
             "coordinates": node.coordinates,
-            "type": node.type
+            "type": node.type,
+            "size": node.size,  # Dodano rozmiar węzła
+            "label_position": node.label_position,  # Dodano pozycję etykiety
+            "label_text_degree": node.label_text_degree  # Dodano obrót tekstu etykiety
         }
         for node in engine.map_data.get_all_nodes()
     ]
@@ -80,7 +83,7 @@ def get_map():
             "line_id": line.line_id,
             "label": line.label,
             "color": line.color,
-            "thickness": getattr(line, "thickness", 1)  # Dodaj grubość linii
+            "thickness": getattr(line, "thickness", 1)  # Dodano grubość linii
         }
         for line in engine.map_data.get_all_lines()
     ]

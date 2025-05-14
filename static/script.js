@@ -35,13 +35,15 @@ function visualizeMap(data) {
 
         if (route && route.length > 1) {
             // Obliczenie całkowitej grubości wszystkich linii w segmencie
-            const totalThickness = segment.lines.reduce((sum, lineId) => {
+            const lineThicknesses = segment.lines.map(lineId => {
                 const line = data.lines.find(l => l.line_id === lineId);
-                return sum + (line ? line.thickness || 2 : 0);
-            }, 0);
+                return line ? line.thickness || 2 : 0;
+            });
+
+            const totalThickness = lineThicknesses.reduce((sum, thickness) => sum + thickness, 0);
 
             // Wyznaczenie początkowego przesunięcia (środek segmentu)
-            const baseOffset = -totalThickness / 2;
+            let currentOffset = -totalThickness / 2;
 
             // Rysowanie każdej linii w segmencie
             segment.lines.forEach((lineId, index) => {
@@ -52,7 +54,7 @@ function visualizeMap(data) {
                 const thickness = line.thickness || 2; // Pobranie grubości linii z JSON-a
 
                 // Obliczenie przesunięcia dla tej linii
-                const offset = baseOffset + (index + 0.5) * thickness;
+                const offset = currentOffset + thickness / 2;
 
                 ctx.beginPath();
                 ctx.moveTo(
@@ -70,6 +72,9 @@ function visualizeMap(data) {
                 ctx.strokeStyle = color;
                 ctx.lineWidth = thickness; // Ustawienie grubości linii
                 ctx.stroke();
+
+                // Przesuń offset dla następnej linii
+                currentOffset += thickness;
             });
         }
     });
