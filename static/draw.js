@@ -1,18 +1,16 @@
-
 // Funkcja do wizualizacji mapy
-export function visualizeMap(data, ctx, canvas) {
+export function visualizeMap(data, ctx, canvas, offsetX = 0, offsetY = 0, scale = 1) {
     // Wyczyszczenie canvas
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     // Skala mapy (dostosowanie współrzędnych do rozmiaru canvas)
-    const scale = 50; // Każda jednostka mapy to 50 pikseli
-    const offsetX = canvas.width / 2; // Środek canvas jako punkt odniesienia
-    const offsetY = canvas.height / 2;
+    const centerX = canvas.width / 2 + offsetX; // Uwzględnienie przesunięcia
+    const centerY = canvas.height / 2 + offsetY;
 
     // Odwrócenie osi Y
-    ctx.save(); // Zapisz aktualny stan kontekstu
-    ctx.translate(0, canvas.height); // Przesuń początek układu współrzędnych na dół canvas
-    ctx.scale(1, -1); // Odwróć oś Y
+    ctx.save();
+    ctx.translate(centerX, centerY);
+    ctx.scale(scale, -scale); // Uwzględnienie skali i odwrócenie osi Y
 
     // Rysowanie segmentów
     data.segments.forEach(segment => {
@@ -36,27 +34,30 @@ export function visualizeMap(data, ctx, canvas) {
                 if (!line) return; // Jeśli linia nie istnieje, pomiń
 
                 const color = line.color || "black"; // Domyślny kolor
-                const thickness = line.thickness || 2; // Pobranie grubości linii z JSON-a
+                const thickness = line.thickness; // Pobranie grubości linii z JSON-a
 
                 // Obliczenie przesunięcia dla tej linii
                 const offset = currentOffset + thickness / 2;
 
+                ctx.save(); // Zapisz aktualny stan kontekstu
+                ctx.strokeStyle = color;
+                ctx.lineWidth = thickness; // Skalowanie grubości linii
                 ctx.beginPath();
                 ctx.moveTo(
-                    route[0][0] * scale + offsetX,
-                    route[0][1] * scale + offsetY + offset
+                    route[0][0] * 50,
+                    route[0][1] * 50 + offset
                 );
 
                 for (let i = 1; i < route.length; i++) {
                     ctx.lineTo(
-                        route[i][0] * scale + offsetX,
-                        route[i][1] * scale + offsetY + offset
+                        route[i][0] * 50,
+                        route[i][1] * 50 + offset
                     );
                 }
 
-                ctx.strokeStyle = color;
-                ctx.lineWidth = thickness; // Ustawienie grubości linii
+
                 ctx.stroke();
+                ctx.restore(); // Przywróć poprzedni stan kontekstu
 
                 // Przesuń offset dla następnej linii
                 currentOffset += thickness;
@@ -66,8 +67,8 @@ export function visualizeMap(data, ctx, canvas) {
 
     // Rysowanie węzłów
     data.nodes.forEach(node => {
-        const x = node.coordinates[0] * scale + offsetX;
-        const y = node.coordinates[1] * scale + offsetY;
+        const x = node.coordinates[0] * 50;
+        const y = node.coordinates[1] * 50;
 
         ctx.save(); // Zapisz aktualny stan kontekstu
         ctx.translate(x, y); // Przesuń układ współrzędnych do pozycji węzła
@@ -85,10 +86,9 @@ export function visualizeMap(data, ctx, canvas) {
                 ctx.fillStyle = "black";
                 ctx.fill();
                 ctx.strokeStyle = "white";
-                ctx.lineWidth = 2;
+                ctx.lineWidth = 2; // Grubość obwódki zmniejsza się przy powiększeniu
                 ctx.stroke();
                 break;
-
 
             case "standard_white":
                 // Biały okrąg z czarną obwódką
@@ -97,7 +97,7 @@ export function visualizeMap(data, ctx, canvas) {
                 ctx.fillStyle = "white";
                 ctx.fill();
                 ctx.strokeStyle = "black";
-                ctx.lineWidth = 2;
+                ctx.lineWidth = 2; // Grubość obwódki zmniejsza się przy powiększeniu
                 ctx.stroke();
                 break;
 
@@ -141,40 +141,56 @@ export function visualizeMap(data, ctx, canvas) {
                 break;
 
             case "text":
-                const labels = node.label.split("|"); // Podział linii na części
-                
-             
-                // Dynamiczne ustawienie rozmiaru czcionki
-                const fontSize = Math.max(8, Math.floor(node.size/labels.length)); // Minimalny rozmiar czcionki to 8
-                ctx.font = `${fontSize}px Courier New, monospace`;
-
-                // Obliczenie szerokości prostokąta na podstawie najdłuższego stringa
-                const maxLabelLength = labels.reduce((max, label) => Math.max(max, label.length), 0); // Znajdź najdłuższy string
-                const rectWidth = maxLabelLength * (fontSize*0.62); // Szerokość prostokąta
-
-                const rectHeight = Math.max(node.size -4, 1); // Wysokość zależna od liczby linii tekstu
-                // Rysowanie prostokąta
+                const labels = node.label.split("|");
+            
+                // Ustal czcionkę na podstawie rozmiaru noda
+                const fontSize = Math.max(6, node.size * 0.6); // Skalowana czcionka
+                ctx.font = `${fontSize}px 'Courier New', monospace`;
+                ctx.textBaseline = "middle";
+                ctx.textAlign = "center";
+            
+                // Oblicz wymiary tła na podstawie najdłuższej etykiety
+                const maxLabel = labels.reduce((a, b) => a.length > b.length ? a : b, "");
+                const textMetrics = ctx.measureText(maxLabel);
+                const paddingX = fontSize * 0.2;
+                const paddingY = fontSize * 0.2;
+                const rectWidth = textMetrics.width + paddingX * 1.9;
+                const rectHeight = labels.length * fontSize + paddingY *1.9;
+            
+                // Rysuj zaokrąglony prostokąt w tle
+                const radius = 4;
+                const x = -rectWidth / 2;
+                const y = -rectHeight / 2;
+            
                 ctx.fillStyle = "white";
-                ctx.fillRect(-rectWidth / 2, -rectHeight / 2, rectWidth, rectHeight);
-                // ctx.strokeStyle = "black";
-                // ctx.lineWidth = 2;
-                // ctx.strokeRect(-rectWidth / 2, -rectHeight / 2, rectWidth, rectHeight);
-
-                
+                ctx.beginPath();
+                ctx.moveTo(x + radius, y);
+                ctx.lineTo(x + rectWidth - radius, y);
+                ctx.quadraticCurveTo(x + rectWidth, y, x + rectWidth, y + radius);
+                ctx.lineTo(x + rectWidth, y + rectHeight - radius);
+                ctx.quadraticCurveTo(x + rectWidth, y + rectHeight, x + rectWidth - radius, y + rectHeight);
+                ctx.lineTo(x + radius, y + rectHeight);
+                ctx.quadraticCurveTo(x, y + rectHeight, x, y + rectHeight - radius);
+                ctx.lineTo(x, y + radius);
+                ctx.quadraticCurveTo(x, y, x + radius, y);
+                ctx.closePath();
+                ctx.fill();
+            
+                // Rysuj tekst
                 ctx.fillStyle = "black";
-
-                // Rysowanie tekstu
+                ctx.save();
+                ctx.scale(1, -1); // Odwrócenie Y do poprawnego rysowania
                 labels.forEach((line, index) => {
-                    const textY = (index - (labels.length - 1) / 2) * fontSize; // Pozycja Y dla każdej linii
-                    ctx.save();
-                    ctx.scale(1, -1); // Przywróć normalną orientację tekstu
-                    ctx.fillText(line, -rectWidth / 2 + 1, -textY+(node.size/4)); // Rysowanie tekstu
-                    ctx.restore();
+                    const lineY = y + paddingY + fontSize / 2 + index * fontSize;
+                    ctx.fillText(line, 0, -lineY);
                 });
+                ctx.restore();
                 break;
+
             case "invisible":
                 // do nothing
                 break;
+
             default:
                 console.warn(`Nieznany typ węzła: ${node.type}`);
         }
