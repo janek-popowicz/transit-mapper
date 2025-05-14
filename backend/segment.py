@@ -39,7 +39,7 @@ class Segment:
 
 
 class Line:
-    def __init__(self, line_id: str, label: str, color: str):
+    def __init__(self, line_id: str, label: str, color: str, thickness: int = 1):
         """
         Initialize a Line object.
 
@@ -47,10 +47,12 @@ class Line:
             line_id (str): Unique identifier for the line.
             label (str): Label for the line.
             color (str): Color of the line (e.g., hex code or color name).
+            thickness (int): Thickness of the line.
         """
         self.line_id = line_id
         self.label = label
         self.color = color
+        self.thickness = thickness  # Dodaj grubość linii
         self.segments = []  # List of segments in the line
 
     def add_segment(self, segment: Segment):

@@ -86,15 +86,15 @@ class Engine:
         return {"status": "success", "message": "Segment removed."}
 
     # Line Operations
-    def add_line(self, line_id: str, label: str, color: str):
+    def add_line(self, line_id: str, label: str, color: str, thickness: int = 1):
         """
         Add a new line to the map.
         """
-        line = Line(line_id, label, color)
+        line = Line(line_id, label, color, thickness)
         self.map_data.add_line(line)
         return {"status": "success", "message": f"Line {line_id} added."}
 
-    def edit_line(self, line_id: str, label: str = None, color: str = None):
+    def edit_line(self, line_id: str, label: str = None, color: str = None, thickness: int = None):
         """
         Edit an existing line.
         """
@@ -105,6 +105,8 @@ class Engine:
             line.label = label
         if color:
             line.color = color
+        if thickness is not None:
+            line.thickness = thickness
         return {"status": "success", "message": f"Line {line_id} updated."}
 
     def remove_line(self, line_id: str):
@@ -140,7 +142,8 @@ class Engine:
             self.add_line(
                 line_data["id"],
                 line_data["label"],
-                line_data["color"]
+                line_data["color"],
+                line_data.get("thickness", 1)  # Pobierz grubość linii
             )
         # Add segments
         for segment_data in data.get("segments", []):
@@ -170,7 +173,8 @@ class Engine:
                 {
                     "line_id": line.line_id,
                     "label": line.label,
-                    "color": line.color
+                    "color": line.color,
+                    "thickness": line.thickness
                 }
                 for line in self.map_data.get_all_lines()
             ],

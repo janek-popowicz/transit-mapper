@@ -2,26 +2,42 @@
   "nodes": [
     {
       "id": "1",
-      "label": "Station A",
+      "label": "Centrum",
+      "label_position": "top",
+      "label_degree": 90,
       "coordinates": [1, 0],
       "type": "station"
     },
     {
       "id": "2",
-      "label": "Station B",
+      "label": "Dworzec Wschodni",
+      "label_position": "top",
+      "label_degree": 90,
       "coordinates": [4, 0],
       "type": "station"
     },
     {
       "id": "3",
-      "label": "Station C",
+      "label": "Praga",
+      "label_position": "top",
+      "label_degree": 90,
       "coordinates": [7, 1],
       "type": "station"
     },
     {
       "id": "4",
-      "label": "Station D",
+      "label": "Stadion",
+      "label_position": "top",
+      "label_degree": 90,
       "coordinates": [4, 4],
+      "type": "station"
+    },
+    {
+      "id": "5",
+      "label": "Dworzec Centralny",
+      "label_position": "top",
+      "label_degree": 90,
+      "coordinates": [-2, 0],
       "type": "station"
     }
   ],
@@ -29,12 +45,23 @@
     {
       "start_node": "1",
       "end_node": "2",
-      "lines": ["M1"],
+      "lines": ["M1", "M2"],
       "route": [
         [1, 0],
         [2, 0],
         [3, 0],
         [4, 0]
+      ]
+    },
+    {
+      "start_node":"1",
+      "end_node": "5",
+      "lines": ["M1"],
+      "route": [
+        [-2, 0],
+        [-1, 0],
+        [0, 0],
+        [1, 0]
       ]
     },
     {
@@ -65,12 +92,14 @@
     {
       "id": "M1",
       "label": "Line 1",
-      "color": "#FF0000"
+      "color": "#000000",
+      "thickness": 10
     },
     {
       "id": "M2",
       "label": "Line 2",
-      "color": "#00FF00"
+      "color": "#00FF00",
+      "thickness": 10
     }
   ]
 }

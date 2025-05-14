@@ -31,16 +31,46 @@ function visualizeMap(data) {
 
     // Rysowanie segmentów
     data.segments.forEach(segment => {
-        const startNode = data.nodes.find(node => node.id === segment.start_node);
-        const endNode = data.nodes.find(node => node.id === segment.end_node);
+        const route = segment.route;
 
-        if (startNode && endNode) {
-            ctx.beginPath();
-            ctx.moveTo(startNode.coordinates[0] * scale + offsetX, startNode.coordinates[1] * scale + offsetY);
-            ctx.lineTo(endNode.coordinates[0] * scale + offsetX, endNode.coordinates[1] * scale + offsetY);
-            ctx.strokeStyle = "red";
-            ctx.lineWidth = 2;
-            ctx.stroke();
+        if (route && route.length > 1) {
+            // Obliczenie całkowitej grubości wszystkich linii w segmencie
+            const totalThickness = segment.lines.reduce((sum, lineId) => {
+                const line = data.lines.find(l => l.line_id === lineId);
+                return sum + (line ? line.thickness || 2 : 0);
+            }, 0);
+
+            // Wyznaczenie początkowego przesunięcia (środek segmentu)
+            const baseOffset = -totalThickness / 2;
+
+            // Rysowanie każdej linii w segmencie
+            segment.lines.forEach((lineId, index) => {
+                const line = data.lines.find(l => l.line_id === lineId);
+                if (!line) return; // Jeśli linia nie istnieje, pomiń
+
+                const color = line.color || "black"; // Domyślny kolor
+                const thickness = line.thickness || 2; // Pobranie grubości linii z JSON-a
+
+                // Obliczenie przesunięcia dla tej linii
+                const offset = baseOffset + (index + 0.5) * thickness;
+
+                ctx.beginPath();
+                ctx.moveTo(
+                    route[0][0] * scale + offsetX,
+                    route[0][1] * scale + offsetY + offset
+                );
+
+                for (let i = 1; i < route.length; i++) {
+                    ctx.lineTo(
+                        route[i][0] * scale + offsetX,
+                        route[i][1] * scale + offsetY + offset
+                    );
+                }
+
+                ctx.strokeStyle = color;
+                ctx.lineWidth = thickness; // Ustawienie grubości linii
+                ctx.stroke();
+            });
         }
     });
 

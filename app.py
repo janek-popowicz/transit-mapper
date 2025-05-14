@@ -79,7 +79,8 @@ def get_map():
         {
             "line_id": line.line_id,
             "label": line.label,
-            "color": line.color
+            "color": line.color,
+            "thickness": getattr(line, "thickness", 1)  # Dodaj grubość linii
         }
         for line in engine.map_data.get_all_lines()
     ]
