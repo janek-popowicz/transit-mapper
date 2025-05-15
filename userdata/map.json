@@ -2,12 +2,12 @@
   "nodes": [
     {
       "id": "1",
-      "label": "T1",
+      "label": "T3|T1",
       "label_position": [10, 10],
       "label_text_degree": 90,
       "coordinates": [1, 0],
       "type": "text",
-      "size": 10
+      "size": 12
     },
     {
       "id": "2",
@@ -26,7 +26,7 @@
       "coordinates": [7, 1],
       "type": "text",
       "type_rotation": 45,
-      "size": 10
+      "size": 12
     },
     {
       "id": "4",
@@ -35,7 +35,7 @@
       "label_text_degree": 90,
       "coordinates": [4, 4],
       "type": "standard_black",
-      "size": 10
+      "size": 20
     },
     {
       "id": "5",
@@ -44,7 +44,7 @@
       "label_text_degree": 90,
       "coordinates": [-2, 0],
       "type": "standard_black",
-      "size": 10
+      "size": 20
     },
     {
       "id": "6",
@@ -52,7 +52,7 @@
       "label_position": [10, -10],
       "label_text_degree": 90,
       "coordinates": [15, 2],
-      "type": "standard_white",
+      "type": "standard_black",
       "size": 20
     }
   ],
@@ -60,7 +60,7 @@
     {
       "start_node": "1",
       "end_node": "2",
-      "lines": ["M1"],
+      "lines": ["M1", "M3"],
       "route": [
         [1, 0],
         [2, 0],
@@ -71,7 +71,7 @@
     {
       "start_node":"1",
       "end_node": "5",
-      "lines": ["M1"],
+      "lines": ["M1", "M3"],
       "route": [
         [-2, 0],
         [-1, 0],
@@ -93,7 +93,7 @@
     {
       "start_node": "2",
       "end_node": "4",
-      "lines": ["M2"],
+      "lines": ["M2", "M3"],
       "route": [
         [4, 0],
         [4, 1],
@@ -130,6 +130,12 @@
       "id": "M2",
       "label": "Line 2",
       "color": "#029402",
+      "thickness": 10
+    },
+    {
+      "id": "M3",
+      "label": "Line 3",
+      "color": "#ffff19",
       "thickness": 10
     }
   ],

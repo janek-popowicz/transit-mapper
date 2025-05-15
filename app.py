@@ -84,6 +84,36 @@ def add_icon():
     )
     return jsonify({"status": "success", "message": "Icon added."})
 
+@app.route("/edit_node", methods=["POST"])
+def edit_node():
+    """
+    Edit an existing node.
+    """
+    data = request.json
+    result = engine.edit_node(
+        data["id"],
+        label=data.get("label"),
+        coordinates=tuple(data.get("coordinates", [])),
+        node_type=data.get("type"),
+        size=data.get("size")
+    )
+    return jsonify(result)
+
+@app.route("/edit_icon", methods=["POST"])
+def edit_icon():
+    """
+    Edit an existing icon.
+    """
+    data = request.json
+    result = engine.map_data.edit_icon(
+        icon_id=data["id"],
+        label=data.get("label"),
+        coordinates=tuple(data.get("coordinates", [])),
+        icon=data.get("icon"),
+        size=data.get("size")
+    )
+    return jsonify({"status": "success", "message": "Icon updated."})
+
 @app.route("/get_map", methods=["GET"])
 def get_map():
     """

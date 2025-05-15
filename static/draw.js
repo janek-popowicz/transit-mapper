@@ -1,9 +1,18 @@
-function drawSmoothPath(ctx, points, offsetY = 0) {
+function drawSmoothPath(ctx, points, offset = 0) {
     if (points.length < 2) return;
 
     const scale = 50;
 
     const mid = (a, b) => [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2];
+
+    const offsetAt = (a, b) => {
+        const dx = b[0] - a[0];
+        const dy = b[1] - a[1];
+        const len = Math.hypot(dx, dy);
+        if (len === 0) return [0, 0];
+        // Zwróć normalny wektor razy offset
+        return [(-dy / len) * offset, (dx / len) * offset];
+    };
 
     const first = points[0];
     const second = points[1];
@@ -13,9 +22,11 @@ function drawSmoothPath(ctx, points, offsetY = 0) {
     const firstMid = mid(first, second);
     const lastMid = mid(secondLast, last);
 
+    let [offsetX, offsetY] = offsetAt(first, second);
     ctx.beginPath();
-    ctx.moveTo(first[0] * scale, first[1] * scale + offsetY);
-    ctx.lineTo(firstMid[0] * scale, firstMid[1] * scale + offsetY);
+    ctx.moveTo(first[0] * scale + offsetX, first[1] * scale + offsetY);
+
+    ctx.lineTo(firstMid[0] * scale + offsetX, firstMid[1] * scale + offsetY);
 
     // Krzywe od środka do środka przez środkowy punkt
     for (let i = 1; i < points.length - 1; i++) {
@@ -25,21 +36,24 @@ function drawSmoothPath(ctx, points, offsetY = 0) {
 
         const start = mid(p0, p1);
         const end = mid(p1, p2);
-        const ctrl = p1;
 
+        const [oX, oY] = offsetAt(p0, p2); // albo p0→p1? ale p0→p2 jest gładsze
+
+        const ctrl = p1;
         ctx.quadraticCurveTo(
-            ctrl[0] * scale,
-            ctrl[1] * scale + offsetY,
-            end[0] * scale,
-            end[1] * scale + offsetY
+            ctrl[0] * scale + oX,
+            ctrl[1] * scale + oY,
+            end[0] * scale + oX,
+            end[1] * scale + oY
         );
     }
 
-    // Ostatnia linia od końcowego środka do ostatniego punktu
-    ctx.lineTo(last[0] * scale, last[1] * scale + offsetY);
+    [offsetX, offsetY] = offsetAt(secondLast, last);
+    ctx.lineTo(last[0] * scale + offsetX, last[1] * scale + offsetY);
 
     ctx.stroke();
 }
+
 
 function drawGrid(ctx, data, cellSize = 50, color = "#e0e0e0") {
     ctx.save();
