@@ -25,6 +25,13 @@ let offsetX = 0; // Przesunięcie mapy w osi X
 let offsetY = 0; // Przesunięcie mapy w osi Y
 let scale = 1; // Początkowa skala mapy
 
+// Debounce do fetchMapData
+let fetchTimeout = null;
+function debounceFetchMapData() {
+    if (fetchTimeout) clearTimeout(fetchTimeout);
+    fetchTimeout = setTimeout(fetchMapData, 30); // 30 ms po ostatnim ruchu
+}
+
 canvas.addEventListener("mousedown", (e) => {
     isDragging = true;
     lastMouseX = e.clientX;
@@ -40,7 +47,7 @@ canvas.addEventListener("mousemove", (e) => {
         offsetY += dy;
         lastMouseX = e.clientX;
         lastMouseY = e.clientY;
-        fetchMapData(); // Ponowne rysowanie mapy z nowym przesunięciem
+        debounceFetchMapData(); // Ogranicz liczbę zapytań
     }
 });
 
@@ -75,26 +82,15 @@ canvas.addEventListener("wheel", (e) => {
     fetchMapData(); // Ponowne rysowanie mapy z nową skalą
 });
 
-// Funkcja do kontrolowania liczby klatek na sekundę
-let lastFrameTime = 0;
-const fpsInterval = 1000 / 30; // 30 klatek na sekundę
-
-function updateMap(currentTime) {
-    if (currentTime - lastFrameTime >= fpsInterval) {
-        lastFrameTime = currentTime;
-        fetchMapData(); // Pobierz dane i narysuj mapę
-    }
-    requestAnimationFrame(updateMap); // Wywołaj kolejną klatkę
-}
-
 // Nasłuchiwanie zdarzenia zmiany rozmiaru okna
-window.addEventListener("resize", resizeCanvas);
+window.addEventListener("resize", () => {
+    resizeCanvas();
+    fetchMapData(); // Odśwież mapę po zmianie rozmiaru okna
+});
 
 // Ustaw początkowy rozmiar canvas
 resizeCanvas();
+fetchMapData(); // Załaduj mapę na start
 
 // Ustaw domyślny kursor na "grab"
 canvas.style.cursor = "default";
-
-// Rozpoczęcie pętli animacji
-requestAnimationFrame(updateMap);
