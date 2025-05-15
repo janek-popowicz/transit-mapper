@@ -1,4 +1,6 @@
 import { visualizeMap } from './draw.js';
+import { pointToSegmentDistance } from './clickHandlers.js';
+import { getMapCoordinatesFromClick } from './clickHandlers.js';
 
 let mapData = null; // Globalna zmienna na dane mapy
 
@@ -126,38 +128,11 @@ fetchMapData(); // Załaduj mapę na start
 canvas.style.cursor = "default";
 
 
-function getMapCoordinatesFromClick(e) {
-    const rect = canvas.getBoundingClientRect();
-    const canvasX = e.clientX - rect.left;
-    const canvasY = e.clientY - rect.top;
-
-    // Transformacja do układu mapy
-    const mapX = (canvasX - canvas.width / 2 - offsetX) / (scale * 50);
-    const mapY = -(canvasY - canvas.height / 2 - offsetY) / (scale * 50);
-
-    return [mapX, mapY];
-}
-
-
-function pointToSegmentDistance(px, py, x1, y1, x2, y2) {
-    const dx = x2 - x1;
-    const dy = y2 - y1;
-    if (dx === 0 && dy === 0) {
-        return Math.hypot(px - x1, py - y1);
-    }
-
-    let t = ((px - x1) * dx + (py - y1) * dy) / (dx * dx + dy * dy);
-    t = Math.max(0, Math.min(1, t));
-
-    const projX = x1 + t * dx;
-    const projY = y1 + t * dy;
-    return Math.hypot(px - projX, py - projY);
-}
 
 canvas.addEventListener("click", (e) => {
     if (!mapData) return;
 
-    const [mapX, mapY] = getMapCoordinatesFromClick(e);
+    const [mapX, mapY] = getMapCoordinatesFromClick(e, canvas, offsetX, offsetY, scale);
     // console.log(`Kliknięcie w: (${mapX.toFixed(2)}, ${mapY.toFixed(2)})`);
     console.log(mapX, mapY);
    
@@ -248,76 +223,6 @@ canvas.addEventListener("click", (e) => {
         console.log("Kliknięto w rzekę:", clickedRiver);
         return;
     }
-
-
-    // const clickedIcon = mapData.icons.find(icon => {
-    //     const [x, y] = icon.coordinates;
-    //     const distance = Math.hypot(mapX - x, mapY - y);
-    //     return distance < icon.size / 2;
-    // });
-
-    // if (clickedIcon) {
-    //     showEditMenu("icon", clickedIcon, e.clientX, e.clientY);
-    //     return;
-    // }
-
-    // // Detekcja segmentów
-    // const segmentHitRadius = 0.1; // W jednostkach mapy (~5 px przy scale 1)
-    // const clickedSegment = mapData.segments.find(segment => {
-    //     const [x1, y1] = segment.from;
-    //     const [x2, y2] = segment.to;
-
-    //     // Oblicz najkrótszy dystans od punktu (mapX, mapY) do odcinka (x1, y1)-(x2, y2)
-    //     const dx = x2 - x1;
-    //     const dy = y2 - y1;
-    //     const lengthSquared = dx * dx + dy * dy;
-    //     if (lengthSquared === 0) return false;
-
-    //     let t = ((mapX - x1) * dx + (mapY - y1) * dy) / lengthSquared;
-    //     t = Math.max(0, Math.min(1, t));
-
-    //     const closestX = x1 + t * dx;
-    //     const closestY = y1 + t * dy;
-    //     const distance = Math.hypot(mapX - closestX, mapY - closestY);
-
-    //     return distance < segmentHitRadius;
-    // });
-
-    // if (clickedSegment) {
-    //     showEditMenu("segment", clickedSegment, e.clientX, e.clientY);
-    //     return;
-    // }
-
-    // // Detekcja rzek
-    // const riverHitRadius = 0.15; // Może być większy niż segmenty, bo rzeki są szersze
-    // const clickedRiver = mapData.rivers.find(river => {
-    //     for (let i = 0; i < river.path.length - 1; i++) {
-    //         const [x1, y1] = river.path[i];
-    //         const [x2, y2] = river.path[i + 1];
-
-    //         const dx = x2 - x1;
-    //         const dy = y2 - y1;
-    //         const lengthSquared = dx * dx + dy * dy;
-    //         if (lengthSquared === 0) continue;
-
-    //         let t = ((mapX - x1) * dx + (mapY - y1) * dy) / lengthSquared;
-    //         t = Math.max(0, Math.min(1, t));
-
-    //         const closestX = x1 + t * dx;
-    //         const closestY = y1 + t * dy;
-    //         const distance = Math.hypot(mapX - closestX, mapY - closestY);
-
-    //         if (distance < riverHitRadius) return true;
-    //     }
-    //     return false;
-    // });
-
-    // if (clickedRiver) {
-    //     showEditMenu("river", clickedRiver, e.clientX, e.clientY);
-    //     return;
-    // }
-
-    // // Jeśli nie kliknięto w żaden element — można dodać menu "dodaj"
 });
 
 function showEditMenu(type, element, clickX, clickY) {
