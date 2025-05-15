@@ -41,7 +41,42 @@ function drawSmoothPath(ctx, points, offsetY = 0) {
     ctx.stroke();
 }
 
+function drawGrid(ctx, data, cellSize = 50, color = "#e0e0e0") {
+    ctx.save();
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 1;
 
+    // Ustal zakres współrzędnych z danych mapy
+    const allPoints = [
+        ...(data.segments?.flatMap(s => s.route) || []),
+        ...(data.rivers?.flatMap(r => r.route) || []),
+        ...(data.stations?.map(s => s.position) || [])
+    ];
+
+    const maxX = 10000;
+    const maxY = 10000;
+
+    const width = maxX * cellSize;
+    const height = maxY * cellSize;
+
+    // Pionowe linie
+    for (let x = -10000; x <= width; x += cellSize) {
+        ctx.beginPath();
+        ctx.moveTo(x, -10000);
+        ctx.lineTo(x, height);
+        ctx.stroke();
+    }
+
+    // Poziome linie
+    for (let y = -10000; y <= height; y += cellSize) {
+        ctx.beginPath();
+        ctx.moveTo(-10000, y);
+        ctx.lineTo(width, y);
+        ctx.stroke();
+    }
+
+    ctx.restore();
+}
 
 export function visualizeMap(data, ctx, canvas, offsetX = 0, offsetY = 0, scale = 1) {
     // Wyczyszczenie canvas
@@ -55,6 +90,9 @@ export function visualizeMap(data, ctx, canvas, offsetX = 0, offsetY = 0, scale 
     ctx.save();
     ctx.translate(centerX, centerY);
     ctx.scale(scale, -scale); // Uwzględnienie skali i odwrócenie osi Y
+
+    drawGrid(ctx, data);
+
 
     // 1. Rysowanie rzek
     data.rivers.forEach(river => {
