@@ -23,3 +23,21 @@ class Node:
         self.size = size
         self.label_position = label_position
         self.label_text_degree = label_text_degree
+
+class Icon:
+    def __init__(self, icon_id: str, label: str, coordinates: tuple, icon: str, size: int):
+        """
+        Initialize an Icon object.
+
+        Args:
+            icon_id (str): Unique identifier for the icon.
+            label (str): Label for the icon.
+            coordinates (tuple): Coordinates of the icon.
+            icon (str): Path to the icon file (e.g., SVG or PNG).
+            size (int): Size of the icon in pixels.
+        """
+        self.icon_id = icon_id
+        self.label = label
+        self.coordinates = coordinates
+        self.icon = icon
+        self.size = size

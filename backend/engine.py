@@ -1,8 +1,10 @@
 import json
 from backend.mapdata import MapData
 from backend.node import Node
+from backend.node import Icon
 from backend.segment import Segment
 from backend.segment import Line
+from backend.segment import River
 
 class Engine:
     def __init__(self):
@@ -10,7 +12,7 @@ class Engine:
         Initialize the Engine with an empty MapData object and load data from map.json.
         """
         self.map_data = MapData()
-        self.import_from_json("backend/map.json")  # Wczytaj dane z map.json
+        self.import_from_json("userdata/map.json")  # Wczytaj dane z map.json
 
     # Node Operations
     def add_node(self, node_id: str, label: str, coordinates: tuple, node_type: str):
@@ -129,6 +131,12 @@ class Engine:
         """
         with open(json_file, "r") as f:
             data = json.load(f)
+
+        # Wczytaj właściwości mapy
+        self.map_data.labels_size = data.get("labels_size", 12)  # Domyślny rozmiar etykiet
+        self.map_data.labels_color = data.get("labels_color", "#000000")  # Domyślny kolor etykiet
+        self.map_data.background_image = data.get("background_image", "None")  # Domyślny brak obrazu tła
+
         # Add nodes
         for node_data in data.get("nodes", []):
             node = Node(
@@ -136,10 +144,10 @@ class Engine:
                 label=node_data["label"],
                 coordinates=tuple(node_data["coordinates"]),
                 type=node_data["type"],
-                type_rotation=node_data.get("type_rotation", 0),  # Pobierz kąt obrotu
-                size=node_data.get("size", 10),  # Pobierz rozmiar węzła
-                label_position=tuple(node_data.get("label_position", (10, 10))),  # Pobierz pozycję etykiety
-                label_text_degree=node_data.get("label_text_degree", 90)  # Pobierz obrót tekstu
+                type_rotation=node_data.get("type_rotation", 0),
+                size=node_data.get("size", 10),
+                label_position=tuple(node_data.get("label_position", (10, 10))),
+                label_text_degree=node_data.get("label_text_degree", 90)
             )
             self.map_data.add_node(node)
         # Add lines
@@ -148,7 +156,7 @@ class Engine:
                 line_data["id"],
                 line_data["label"],
                 line_data["color"],
-                line_data.get("thickness", 1)  # Pobierz grubość linii
+                line_data.get("thickness", 1)
             )
         # Add segments
         for segment_data in data.get("segments", []):
@@ -158,6 +166,26 @@ class Engine:
                 segment_data["lines"],
                 segment_data["route"]
             )
+        # Add rivers
+        for river_data in data.get("rivers", []):
+            river = River(
+                river_id=river_data["id"],
+                label=river_data["label"],
+                route=river_data["route"],
+                width=river_data["width"],
+                color=river_data["color"]
+            )
+            self.map_data.add_river(river)
+        # Add icons
+        for icon_data in data.get("icons", []):
+            icon = Icon(
+                icon_id=icon_data["id"],
+                label=icon_data["label"],
+                coordinates=tuple(icon_data["coordinates"]),
+                icon=icon_data["icon"],
+                size=icon_data["size"]
+            )
+            self.map_data.add_icon(icon)
         return {"status": "success", "message": "Map data imported from JSON."}
 
     def export_to_json(self, json_file: str):
@@ -165,6 +193,9 @@ class Engine:
         Export map data to a JSON file.
         """
         data = {
+            "labels_size": self.map_data.labels_size,
+            "labels_color": self.map_data.labels_color,
+            "background_image": self.map_data.background_image,
             "nodes": [
                 {
                     "id": node.id,
@@ -191,6 +222,26 @@ class Engine:
                     "route": segment.route
                 }
                 for segment in self.map_data.get_all_segments()
+            ],
+            "rivers": [
+                {
+                    "id": river.river_id,
+                    "label": river.label,
+                    "route": river.route,
+                    "width": river.width,
+                    "color": river.color
+                }
+                for river in self.map_data.get_all_rivers()
+            ],
+            "icons": [
+                {
+                    "id": icon.icon_id,
+                    "label": icon.label,
+                    "coordinates": icon.coordinates,
+                    "icon": icon.icon,
+                    "size": icon.size
+                }
+                for icon in self.map_data.get_all_icons()
             ]
         }
         with open(json_file, "w") as f:

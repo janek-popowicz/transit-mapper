@@ -1,4 +1,48 @@
-// Funkcja do wizualizacji mapy
+function drawSmoothPath(ctx, points, offsetY = 0) {
+    if (points.length < 2) return;
+
+    const scale = 50;
+
+    const mid = (a, b) => [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2];
+
+    const first = points[0];
+    const second = points[1];
+    const last = points[points.length - 1];
+    const secondLast = points[points.length - 2];
+
+    const firstMid = mid(first, second);
+    const lastMid = mid(secondLast, last);
+
+    ctx.beginPath();
+    ctx.moveTo(first[0] * scale, first[1] * scale + offsetY);
+    ctx.lineTo(firstMid[0] * scale, firstMid[1] * scale + offsetY);
+
+    // Krzywe od środka do środka przez środkowy punkt
+    for (let i = 1; i < points.length - 1; i++) {
+        const p0 = points[i - 1];
+        const p1 = points[i];
+        const p2 = points[i + 1];
+
+        const start = mid(p0, p1);
+        const end = mid(p1, p2);
+        const ctrl = p1;
+
+        ctx.quadraticCurveTo(
+            ctrl[0] * scale,
+            ctrl[1] * scale + offsetY,
+            end[0] * scale,
+            end[1] * scale + offsetY
+        );
+    }
+
+    // Ostatnia linia od końcowego środka do ostatniego punktu
+    ctx.lineTo(last[0] * scale, last[1] * scale + offsetY);
+
+    ctx.stroke();
+}
+
+
+
 export function visualizeMap(data, ctx, canvas, offsetX = 0, offsetY = 0, scale = 1) {
     // Wyczyszczenie canvas
     ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -12,7 +56,52 @@ export function visualizeMap(data, ctx, canvas, offsetX = 0, offsetY = 0, scale 
     ctx.translate(centerX, centerY);
     ctx.scale(scale, -scale); // Uwzględnienie skali i odwrócenie osi Y
 
-    // Rysowanie segmentów
+    // 1. Rysowanie rzek
+    data.rivers.forEach(river => {
+        ctx.save();
+        ctx.beginPath();
+        ctx.lineWidth = river.width; // Skalowanie szerokości rzeki
+        ctx.strokeStyle = river.color; // Kolor rzeki
+        const [startX, startY] = river.route[0];
+        drawSmoothPath(ctx, river.route);
+        ctx.stroke();
+        ctx.restore();
+    });
+    
+    // 2. Rysowanie ikon
+    const iconCache = {}; // Cache na załadowane obrazy ikon
+
+    data.icons.forEach(icon => {
+        const centerX = canvas.width / 2 + offsetX;
+        const centerY = canvas.height / 2 + offsetY;
+
+        const x = centerX + icon.coordinates[0] * 50 * scale;
+        const y = centerY - icon.coordinates[1] * 50 * scale; // oś Y jest odwrócona
+
+        if (!iconCache[icon.icon]) {
+            // Jeśli obraz nie jest jeszcze załadowany, załaduj go
+            const img = new Image();
+            img.src = icon.icon; // Ścieżka do pliku ikony
+            img.onload = () => {
+                iconCache[icon.icon] = img; // Zapisz obraz w cache
+                ctx.save();
+                ctx.translate(x, y); // Przesunięcie do pozycji ikony
+                ctx.scale(1 * scale, 1 * scale); // Skalowanie ikony
+                ctx.drawImage(img, -icon.size / 2, -icon.size / 2, icon.size, icon.size); // Rysowanie ikony od środka
+                ctx.restore();
+            };
+        } else {
+            // Jeśli obraz jest już załadowany, rysuj go od razu
+            const img = iconCache[icon.icon];
+            ctx.save();
+            ctx.translate(x, y); // Przesunięcie do pozycji ikony
+            ctx.scale(1 * scale, 1 * scale); // Skalowanie ikony
+            ctx.drawImage(img, -icon.size / 2, -icon.size / 2, icon.size, icon.size); // Rysowanie ikony od środka
+            ctx.restore();
+        }
+    });
+
+    // 3. Rysowanie segmentów
     data.segments.forEach(segment => {
         const route = segment.route;
 
@@ -43,17 +132,8 @@ export function visualizeMap(data, ctx, canvas, offsetX = 0, offsetY = 0, scale 
                 ctx.strokeStyle = color;
                 ctx.lineWidth = thickness; // Skalowanie grubości linii
                 ctx.beginPath();
-                ctx.moveTo(
-                    route[0][0] * 50,
-                    route[0][1] * 50 + offset
-                );
+                drawSmoothPath(ctx, route, offset);
 
-                for (let i = 1; i < route.length; i++) {
-                    ctx.lineTo(
-                        route[i][0] * 50,
-                        route[i][1] * 50 + offset
-                    );
-                }
 
 
                 ctx.stroke();
@@ -65,7 +145,7 @@ export function visualizeMap(data, ctx, canvas, offsetX = 0, offsetY = 0, scale 
         }
     });
 
-    // Rysowanie węzłów
+    // 4. Rysowanie węzłów
     data.nodes.forEach(node => {
         const x = node.coordinates[0] * 50;
         const y = node.coordinates[1] * 50;
@@ -142,6 +222,7 @@ export function visualizeMap(data, ctx, canvas, offsetX = 0, offsetY = 0, scale 
 
             case "text":
                 const labels = node.label.split("|");
+                labels.reverse(); // Odwrócenie etykiet, aby były rysowane od dołu do góry
             
                 // Ustal czcionkę na podstawie rozmiaru noda
                 const fontSize = Math.max(6, node.size * 0.6); // Skalowana czcionka
@@ -197,7 +278,7 @@ export function visualizeMap(data, ctx, canvas, offsetX = 0, offsetY = 0, scale 
 
         ctx.restore(); // Przywróć poprzedni stan kontekstu
 
-        // Dodanie etykiety z uwzględnieniem pozycji i kąta obrotu
+        // 5. Dodanie etykiety z uwzględnieniem pozycji i kąta obrotu
         if (node.type !== "text" && node.type !== "invisible") {
             ctx.save();
             ctx.scale(1, -1); // Przywróć normalną orientację tekstu
@@ -206,8 +287,8 @@ export function visualizeMap(data, ctx, canvas, offsetX = 0, offsetY = 0, scale 
             ctx.translate(labelX, labelY); // Przesunięcie do pozycji etykiety
             ctx.rotate(((node.label_text_degree || 0) - 90) * Math.PI / 180); // Obrót tekstu
 
-            ctx.font = "12px Arial";
-            ctx.fillStyle = "black";
+            ctx.font = `${data.labels_size}px Arial`;
+            ctx.fillStyle = data.labels_color || "black"; // Kolor etykiety
             ctx.fillText(node.label, 0, 0); // Rysowanie tekstu
             ctx.restore(); // Przywróć poprzedni stan kontekstu
         }

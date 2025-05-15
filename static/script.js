@@ -29,7 +29,7 @@ let scale = 1; // Początkowa skala mapy
 let fetchTimeout = null;
 function debounceFetchMapData() {
     if (fetchTimeout) clearTimeout(fetchTimeout);
-    fetchTimeout = setTimeout(fetchMapData, 30); // 30 ms po ostatnim ruchu
+    fetchTimeout = setTimeout(fetchMapData, 5); // 30 ms po ostatnim ruchu
 }
 
 canvas.addEventListener("mousedown", (e) => {
@@ -53,12 +53,12 @@ canvas.addEventListener("mousemove", (e) => {
 
 canvas.addEventListener("mouseup", () => {
     isDragging = false;
-    canvas.style.cursor = "default"; // Przywróć kursor na "grab"
+    canvas.style.cursor = "default";
 });
 
 canvas.addEventListener("mouseleave", () => {
     isDragging = false;
-    canvas.style.cursor = "default"; // Przywróć kursor na "grab"
+    canvas.style.cursor = "default";
 });
 
 // Obsługa zoomu (scroll myszki)

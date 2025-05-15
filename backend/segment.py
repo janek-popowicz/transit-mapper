@@ -74,3 +74,22 @@ class Line:
             list: A list of all segments.
         """
         return self.segments
+
+
+class River:
+    def __init__(self, river_id: str, label: str, route: list, width: int, color: str):
+        """
+        Initialize a River object.
+
+        Args:
+            river_id (str): Unique identifier for the river.
+            label (str): Label for the river.
+            route (list): List of coordinates defining the river's path.
+            width (int): Width of the river in pixels.
+            color (str): Color of the river (e.g., hex code or color name).
+        """
+        self.river_id = river_id
+        self.label = label
+        self.route = route
+        self.width = width
+        self.color = color

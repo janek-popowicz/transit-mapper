@@ -1,9 +1,7 @@
 from flask import Flask, render_template, request, jsonify
 from backend.engine import Engine
-from nigeria import niga 
-app = Flask(__name__)
+app = Flask(__name__, static_folder="static", template_folder="templates")
 engine = Engine()
-niga == 1 
 @app.route("/")
 def index():
     """
@@ -52,6 +50,40 @@ def add_line():
     )
     return jsonify(result)
 
+@app.route("/add_river", methods=["POST"])
+def add_river():
+    """
+    Add a new river to the map.
+    """
+    data = request.json
+    result = engine.map_data.add_river(
+        River(
+            river_id=data["id"],
+            label=data["label"],
+            route=data["route"],
+            width=data["width"],
+            color=data["color"]
+        )
+    )
+    return jsonify({"status": "success", "message": "River added."})
+
+@app.route("/add_icon", methods=["POST"])
+def add_icon():
+    """
+    Add a new icon to the map.
+    """
+    data = request.json
+    result = engine.map_data.add_icon(
+        Icon(
+            icon_id=data["id"],
+            label=data["label"],
+            coordinates=tuple(data["coordinates"]),
+            icon=data["icon"],
+            size=data["size"]
+        )
+    )
+    return jsonify({"status": "success", "message": "Icon added."})
+
 @app.route("/get_map", methods=["GET"])
 def get_map():
     """
@@ -63,10 +95,10 @@ def get_map():
             "label": node.label,
             "coordinates": node.coordinates,
             "type": node.type,
-            "type_rotation": node.type_rotation,  # Dodano kąt obrotu
-            "size": node.size,  # Dodano rozmiar węzła
-            "label_position": list(node.label_position),  # Konwersja tuple na listę
-            "label_text_degree": node.label_text_degree  # Dodano obrót tekstu etykiety
+            "type_rotation": node.type_rotation,
+            "size": node.size,
+            "label_position": list(node.label_position),
+            "label_text_degree": node.label_text_degree
         }
         for node in engine.map_data.get_all_nodes()
     ]
@@ -79,16 +111,51 @@ def get_map():
         }
         for segment in engine.map_data.get_all_segments()
     ]
+    rivers = [
+        {
+            "id": river.river_id,
+            "label": river.label,
+            "route": river.route,
+            "width": river.width,
+            "color": river.color
+        }
+        for river in engine.map_data.get_all_rivers()
+    ]
+    icons = [
+        {
+            "id": icon.icon_id,
+            "label": icon.label,
+            "coordinates": icon.coordinates,
+            "icon": icon.icon,
+            "size": icon.size
+        }
+        for icon in engine.map_data.get_all_icons()
+    ]
     lines = [
         {
             "line_id": line.line_id,
             "label": line.label,
             "color": line.color,
-            "thickness": getattr(line, "thickness", 1)  # Dodano grubość linii
+            "thickness": line.thickness
         }
         for line in engine.map_data.get_all_lines()
     ]
-    return jsonify({"nodes": nodes, "segments": segments, "lines": lines})
+
+    # Dodanie nowych właściwości do odpowiedzi
+    map_settings = {
+        "labels_size": engine.map_data.labels_size,
+        "labels_color": engine.map_data.labels_color,
+        "background_image": engine.map_data.background_image
+    }
+
+    return jsonify({
+        "nodes": nodes,
+        "segments": segments,
+        "lines": lines,
+        "rivers": rivers,
+        "icons": icons,
+        **map_settings
+    })
 
 if __name__ == "__main__":
     app.run(debug=True)

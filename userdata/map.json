@@ -12,7 +12,7 @@
     {
       "id": "2",
       "label": "Dworzec Kolejowy",
-      "label_position": [0, -20],
+      "label_position": [-30, -40],
       "label_text_degree": 90,
       "coordinates": [4, 0],
       "type": "standard_white",
@@ -49,7 +49,7 @@
     {
       "id": "6",
       "label": "Os. Tysiąclecia",
-      "label_position": [10, 0],
+      "label_position": [10, -10],
       "label_text_degree": 90,
       "coordinates": [15, 2],
       "type": "standard_white",
@@ -129,8 +129,74 @@
     {
       "id": "M2",
       "label": "Line 2",
-      "color": "#00FFFF",
+      "color": "#029402",
       "thickness": 10
     }
-  ]
+  ],
+  "rivers": [
+    {
+      "id": "1",
+      "label": "Wisła",
+      "route": [
+        [-10, -1],
+        [-9, -1],
+        [-8, -1],
+        [-7, -1],
+        [-6, -1],
+        [-5, -1],
+        [-4, -1],
+        [-3, -1],
+        [-2, -1],
+        [-1, -1],
+        [0, -1],
+        [0, -2],
+        [0, -3],
+        [0, -4],
+        [0, -5],
+        [0, -6],
+        [0, -7],
+        [0, -8],
+        [0, -9],
+        [0, -10],
+        [0, -11],
+        [0, -12],
+        [0, -13],
+        [0, -14],
+        [0, -15],
+        [0, -16],
+        [0, -17],
+        [0, -18],
+        [0, -19],
+        [0, -20]
+      ],
+      "width": 30,
+      "color": "#0059ff"
+    }
+  ],
+  "icons": [
+    {
+      "id": "1",
+      "label": "Dworzec",
+      "coordinates": [4, -1],
+      "icon": "/static/icons/train.svg",
+      "size": 40
+    },
+    {
+      "id": "2",
+      "label": "Stadion",
+      "coordinates": [6, 4.3],
+      "icon": "/static/icons/stadium.svg",
+      "size": 40
+    },
+    {
+      "id": "3",
+      "label": "Airport",
+      "coordinates": [15, 1],
+      "icon": "/static/icons/airport.svg",
+      "size": 40
+    }
+  ],
+  "labels_size": 20,
+  "labels_color": "#000000",
+  "background_image": "/static/images/background.png"
 }
