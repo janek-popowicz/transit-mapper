@@ -1,6 +1,7 @@
 import { visualizeMap } from './draw.js';
 import { pointToSegmentDistance } from './clickHandlers.js';
 import { getMapCoordinatesFromClick } from './clickHandlers.js';
+import { showEditMenu } from './editMenu.js';
 
 let mapData = null; // Globalna zmienna na dane mapy
 
@@ -154,7 +155,7 @@ canvas.addEventListener("click", (e) => {
     });
 
     if (clickedNode) {
-        // showEditMenu("node", clickedNode, e.clientX, e.clientY);
+        showEditMenu("node", clickedNode, applyChanges, fetchMapData);
         console.log("Kliknięto w node'a:", clickedNode);
         return;
     }
@@ -176,7 +177,7 @@ canvas.addEventListener("click", (e) => {
     });
     
     if (clickedSegment) {
-        // showEditMenu("segment", clickedSegment, e.clientX, e.clientY);
+        showEditMenu("segment", clickedSegment, applyChanges, fetchMapData);
         console.log("Kliknięto w segment:", clickedSegment);
         return;
     }
@@ -197,7 +198,7 @@ canvas.addEventListener("click", (e) => {
     });
     
     if (clickedIcon) {
-        // showEditMenu("icon", clickedIcon, e.clientX, e.clientY);
+        showEditMenu("icon", clickedIcon, applyChanges, fetchMapData);
         console.log("Kliknięto w ikonę:", clickedIcon);
         return;
     }
@@ -219,79 +220,53 @@ canvas.addEventListener("click", (e) => {
     });
     
     if (clickedRiver) {
-        // showEditMenu("segment", clickedSegment, e.clientX, e.clientY);
+        showEditMenu("river", clickedRiver, applyChanges, fetchMapData);
         console.log("Kliknięto w rzekę:", clickedRiver);
         return;
     }
 });
 
-function showEditMenu(type, element, clickX, clickY) {
-    const menu = document.createElement("div");
-    menu.className = "edit-menu";
-    menu.style.position = "absolute";
-    menu.style.left = `${clickX}px`;
-    menu.style.top = `${clickY}px`;
+async function applyChanges(type, element) {
+    console.log("Sending data to backend:", { type, element }); // Loguj dane
+    let endpoint;
 
-    menu.style.backgroundColor = "white";
-    menu.style.border = "1px solid #ccc";
-    menu.style.padding = "10px";
-    menu.style.zIndex = 1000;
-
-    // Dodaj pola edycji w zależności od typu elementu
+    // Wybierz odpowiedni endpoint na podstawie typu
     if (type === "node") {
-        menu.innerHTML = `
-            <h3>Edit Node</h3>
-            <label>Label: <input type="text" id="node-label" value="${element.label}"></label><br>
-            <label>Size: <input type="number" id="node-size" value="${element.size}"></label><br>
-            <button id="save-node">Save</button>
-        `;
+        endpoint = "/edit_node";
     } else if (type === "icon") {
-        menu.innerHTML = `
-            <h3>Edit Icon</h3>
-            <label>Label: <input type="text" id="icon-label" value="${element.label}"></label><br>
-            <label>Size: <input type="number" id="icon-size" value="${element.size}"></label><br>
-            <button id="save-icon">Save</button>
-        `;
+        endpoint = "/edit_icon";
+    } else if (type === "segment") {
+        endpoint = "/edit_segment";
+    } else if (type === "river") {
+        endpoint = "/edit_river";
+    } else if (type === "line") {
+        endpoint = "/edit_line";
+    } else if (type === "map_settings") {
+        endpoint = "/edit_map_settings";
+    } else {
+        console.error(`Unsupported type: ${type}`);
+        return;
     }
 
-    document.body.appendChild(menu);
+    try {
+        const response = await fetch(endpoint, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(element), // Przesyłaj cały obiekt, w tym id
+        });
 
-    // Obsługa zapisu zmian
-    menu.querySelector("button").addEventListener("click", () => {
-        if (type === "node") {
-            element.label = menu.querySelector("#node-label").value;
-            element.size = parseInt(menu.querySelector("#node-size").value, 10);
-        } else if (type === "icon") {
-            element.label = menu.querySelector("#icon-label").value;
-            element.size = parseInt(menu.querySelector("#icon-size").value, 10);
+        if (!response.ok) {
+            const error = await response.json();
+            console.error(`Failed to update ${type}:`, error.message);
+            return;
         }
 
-        // Wyślij zmiany do backendu
-        saveChanges(type, element);
-
-        // Usuń menu edycji
-        document.body.removeChild(menu);
-
-        // Odśwież mapę
-        fetchMapData();
-    });
-}
-
-
-async function saveChanges(type, element) {
-    const endpoint = type === "node" ? "/edit_node" : "/edit_icon";
-    const response = await fetch(endpoint, {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-        },
-        body: JSON.stringify(element),
-    });
-
-    const result = await response.json();
-    if (result.status === "success") {
-        console.log(`${type} updated successfully.`);
-    } else {
-        console.error(`Failed to update ${type}:`, result.message);
+        const result = await response.json();
+        console.log(`${type} updated successfully:`, result.message);
+    } catch (error) {
+        console.error(`Error updating ${type}:`, error);
     }
+    fetchMapData(); // Odśwież mapę po zapisaniu zmian
 }

@@ -23,7 +23,7 @@ class Engine:
         self.map_data.add_node(node)
         return {"status": "success", "message": f"Node {node_id} added."}
 
-    def edit_node(self, node_id: str, label: str = None, coordinates: tuple = None, node_type: str = None):
+    def edit_node(self, node_id: str, label: str = None, coordinates: tuple = None, node_type: str = None, size: int = None):
         """
         Edit an existing node.
         """
@@ -36,6 +36,8 @@ class Engine:
             node.coordinates = coordinates
         if node_type:
             node.type = node_type
+        if size is not None:
+            node.size = size
         return {"status": "success", "message": f"Node {node_id} updated."}
 
     def remove_node(self, node_id: str):
@@ -53,7 +55,7 @@ class Engine:
         return {"status": "success", "message": f"Node {node_id} removed."}
 
     # Segment Operations
-    def add_segment(self, start_node_id: str, end_node_id: str, lines: list, route: list):
+    def add_segment(self, segment_id: str, start_node_id: str, end_node_id: str, lines: list, route: list):
         """
         Add a new segment to the map.
         """
@@ -61,22 +63,22 @@ class Engine:
         end_node = self.map_data.get_node(end_node_id)
         if not start_node or not end_node:
             return {"status": "error", "message": "Start or end node does not exist."}
-        segment = Segment(start_node, end_node, lines, route)
+        segment = Segment(segment_id, start_node, end_node, lines, route)
         self.map_data.add_segment(segment)
-        return {"status": "success", "message": "Segment added."}
+        return {"status": "success", "message": f"Segment {segment_id} added."}
 
-    def edit_segment(self, segment_index: int, lines: list = None, route: list = None):
+    def edit_segment(self, segment_id: str, lines: list = None, route: list = None):
         """
         Edit an existing segment.
         """
-        if segment_index < 0 or segment_index >= len(self.map_data.segments):
-            return {"status": "error", "message": "Segment index out of range."}
-        segment = self.map_data.segments[segment_index]
+        segment = next((s for s in self.map_data.segments if s.id == segment_id), None)
+        if not segment:
+            return {"status": "error", "message": f"Segment with ID {segment_id} does not exist."}
         if lines:
             segment.lines = lines
         if route:
             segment.route = route
-        return {"status": "success", "message": "Segment updated."}
+        return {"status": "success", "message": f"Segment {segment_id} updated."}
 
     def remove_segment(self, segment_index: int):
         """
@@ -161,6 +163,7 @@ class Engine:
         # Add segments
         for segment_data in data.get("segments", []):
             self.add_segment(
+                segment_data["id"],
                 segment_data["start_node"],
                 segment_data["end_node"],
                 segment_data["lines"],

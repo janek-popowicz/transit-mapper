@@ -58,6 +58,7 @@
   ],
   "segments": [
     {
+      "id": "1",
       "start_node": "1",
       "end_node": "2",
       "lines": ["M1", "M3"],
@@ -69,6 +70,7 @@
       ]
     },
     {
+      "id": "2",
       "start_node":"1",
       "end_node": "5",
       "lines": ["M1", "M3"],
@@ -80,6 +82,7 @@
       ]
     },
     {
+      "id":"3",
       "start_node": "2",
       "end_node": "3",
       "lines": ["M1", "M2"],
@@ -91,6 +94,7 @@
       ]
     },
     {
+      "id": "4",
       "start_node": "2",
       "end_node": "4",
       "lines": ["M2", "M3"],
@@ -103,6 +107,7 @@
       ]
     },
     {
+      "id": "5",
       "start_node": "3",
       "end_node": "6",
       "lines": ["M1", "M2"],

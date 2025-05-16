@@ -1,7 +1,7 @@
 from backend.node import Node
 
 class Segment:
-    def __init__(self, start_node: Node, end_node: Node, lines: list, route: list):
+    def __init__(self, id, start_node: Node, end_node: Node, lines: list, route: list):
         """
         Initialize a Segment object.
 
@@ -11,6 +11,7 @@ class Segment:
             lines (list): List of line IDs associated with this segment.
             route (list): List of coordinates on the route. Must start with start_node's coords and end with end_node's coords.
         """
+        self.id = id
         self.start_node = start_node
         self.end_node = end_node
         self.lines = lines  # List of line IDs

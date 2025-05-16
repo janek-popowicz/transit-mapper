@@ -142,3 +142,18 @@ class MapData:
             list: A list of all icons.
         """
         return self.icons
+
+    def get_icon(self, icon_id: str):
+        """
+        Retrieve an icon by its ID.
+
+        Args:
+            icon_id (str): The ID of the icon to retrieve.
+
+        Returns:
+            Icon: The icon with the specified ID, or None if not found.
+        """
+        for icon in self.icons:
+            if icon.icon_id == icon_id:
+                return icon
+        return None

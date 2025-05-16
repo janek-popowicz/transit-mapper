@@ -30,6 +30,7 @@ def add_segment():
     """
     data = request.json
     result = engine.add_segment(
+        data["id"],  # Dodaj ID segmentu
         data["start_node_id"],
         data["end_node_id"],
         data["lines"],
@@ -90,6 +91,7 @@ def edit_node():
     Edit an existing node.
     """
     data = request.json
+    print("Received data for node:", data)  # Loguj dane w terminalu
     result = engine.edit_node(
         data["id"],
         label=data.get("label"),
@@ -105,14 +107,92 @@ def edit_icon():
     Edit an existing icon.
     """
     data = request.json
-    result = engine.map_data.edit_icon(
-        icon_id=data["id"],
-        label=data.get("label"),
-        coordinates=tuple(data.get("coordinates", [])),
-        icon=data.get("icon"),
-        size=data.get("size")
-    )
-    return jsonify({"status": "success", "message": "Icon updated."})
+    print("Received data:", data)  # Loguj dane w terminalu
+    icon = engine.map_data.get_icon(data["id"])
+    if not icon:
+        return jsonify({"status": "error", "message": f"Icon {data['id']} does not exist."}), 404
+
+    # Aktualizuj właściwości ikony
+    if "label" in data:
+        icon.label = data["label"]
+    if "coordinates" in data:
+        icon.coordinates = tuple(data["coordinates"])
+    if "icon" in data:
+        icon.icon = data["icon"]
+    if "size" in data:
+        icon.size = data["size"]
+
+    return jsonify({"status": "success", "message": f"Icon {data['id']} updated."})
+
+@app.route("/edit_segment", methods=["POST"])
+def edit_segment():
+    """
+    Edit an existing segment.
+    """
+    data = request.json
+    print("Received data for segment:", data)  # Loguj dane w terminalu
+
+    # Znajdź segment na podstawie ID
+    segment_id = data.get("id")
+    segment = next((s for s in engine.map_data.segments if s.id == segment_id), None)
+    if not segment:
+        return jsonify({"status": "error", "message": f"Segment with ID {segment_id} does not exist."}), 404
+
+    # Aktualizuj segment
+    if "lines" in data:
+        segment.lines = data["lines"]
+    if "route" in data:
+        segment.route = data["route"]
+
+    return jsonify({"status": "success", "message": f"Segment {segment_id} updated."})
+
+@app.route("/edit_river", methods=["POST"])
+def edit_river():
+    """
+    Edit an existing river.
+    """
+    data = request.json
+    print("Received data for river:", data)  # Loguj dane w terminalu
+
+    river_id = data.get("id")
+    river = next((r for r in engine.map_data.rivers if r.river_id == river_id), None)
+    if not river:
+        return jsonify({"status": "error", "message": f"River with ID {river_id} does not exist."}), 404
+
+    # Aktualizuj właściwości rzeki
+    if "label" in data:
+        river.label = data["label"]
+    if "route" in data:
+        river.route = data["route"]
+    if "width" in data:
+        river.width = data["width"]
+    if "color" in data:
+        river.color = data["color"]
+
+    return jsonify({"status": "success", "message": f"River {river_id} updated."})
+
+@app.route("/edit_line", methods=["POST"])
+def edit_line():
+    """
+    Edit an existing line.
+    """
+    data = request.json
+    print("Received data for line:", data)  # Loguj dane w terminalu
+
+    line_id = data.get("id")
+    line = engine.map_data.get_line(line_id)
+    if not line:
+        return jsonify({"status": "error", "message": f"Line with ID {line_id} does not exist."}), 404
+
+    # Aktualizuj właściwości linii
+    if "label" in data:
+        line.label = data["label"]
+    if "color" in data:
+        line.color = data["color"]
+    if "thickness" in data:
+        line.thickness = data["thickness"]
+
+    return jsonify({"status": "success", "message": f"Line {line_id} updated."})
 
 @app.route("/get_map", methods=["GET"])
 def get_map():
@@ -134,6 +214,7 @@ def get_map():
     ]
     segments = [
         {
+            "id": segment.id,
             "start_node": segment.start_node.id,
             "end_node": segment.end_node.id,
             "lines": segment.lines,
@@ -186,6 +267,23 @@ def get_map():
         "icons": icons,
         **map_settings
     })
+
+@app.route("/edit_map_settings", methods=["POST"])
+def edit_map_settings():
+    """
+    Edit global map settings.
+    """
+    data = request.json
+    print("Received data for map settings:", data)  # Loguj dane w terminalu
+
+    if "labels_size" in data:
+        engine.map_data.labels_size = data["labels_size"]
+    if "labels_color" in data:
+        engine.map_data.labels_color = data["labels_color"]
+    if "background_image" in data:
+        engine.map_data.background_image = data["background_image"]
+
+    return jsonify({"status": "success", "message": "Map settings updated."})
 
 if __name__ == "__main__":
     app.run(debug=True)

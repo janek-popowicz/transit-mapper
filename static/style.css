@@ -1,10 +1,80 @@
-body {
-    font-family: Arial, sans-serif;
-    margin: 20px;
-}
 h1 {
     color: #333;
 }
+body {
+            margin: 0;
+            overflow: hidden;
+            background-color:#FFFFFF;
+        }
+        canvas {
+            display: block;
+            width: 100vw;
+            height: 100vh;
+        }
 form {
     margin-bottom: 20px;
+}
+/* Ustawienia ogólnego menu */
+.menu {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    background-color: rgb(255, 197, 197);
+    border: 1px solid #ad0000;
+    border-radius: 5px;
+    padding: 10px;
+    box-shadow: 0 2px 5px rgba(17, 38, 155, 0.2);
+    z-index: 1000;
+    min-width: 400px;
+}
+.menu button {
+    display: block;
+    width: 100%;
+    margin-bottom: 10px;
+    padding: 10px;
+    font-size: 20px;
+    cursor: pointer;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    background-color: #f9f9f9;
+}
+.menu button:hover {
+    background-color: #e0e0e0;
+}
+/* Ustawienia kontekstowego menu */
+.edit-menu {
+    position: absolute;
+    left: 10px;
+    bottom: 10px;
+    background-color: rgb(255, 197, 197);
+    border: 1px solid #ad0000;
+    border-radius: 5px;
+    padding: 10px;
+    box-shadow: 0 2px 5px rgba(17, 38, 155, 0.2);
+    z-index: 1000;
+    min-width: 400px;
+}
+.edit-menu h3 {
+    margin-top: 0;
+    font-size: 1.1em;
+}
+.edit-menu label {
+    display: block;
+    margin-bottom: 8px;
+}
+.edit-menu input, .edit-menu button {
+    font-size: 1em;
+    margin-top: 2px;
+}
+.edit-menu button {
+    margin-top: 10px;
+    width: 100%;
+    padding: 8px;
+    border-radius: 3px;
+    border: 1px solid #ccc;
+    background: #f9f9f9;
+    cursor: pointer;
+}
+.edit-menu button:hover {
+    background: #e0e0e0;
 }
