@@ -3,8 +3,13 @@ import { pointToSegmentDistance } from './clickHandlers.js';
 import { getMapCoordinatesFromClick } from './clickHandlers.js';
 import { showEditMenu } from './editMenu.js';
 import { generateLineList } from './lineMenu.js';
+import { uploadMap, downloadMap, loadInitialMapData } from './importexport.js';
 
-let mapData = null; // Globalna zmienna na dane mapy
+export let mapData = null; // Eksportuj mapData
+
+export function setMapData(newData) {
+    mapData = newData; // Funkcja do aktualizacji mapData
+}
 
 // Inicjalizacja canvas
 const canvas = document.getElementById("map");
@@ -17,7 +22,7 @@ function resizeCanvas() {
 }
 
 // Funkcja do pobierania danych mapy z backendu
-async function fetchMapData() {
+export async function fetchMapData() {
     console.log("Fetched map data:", mapData); // Loguj dane mapy
     visualizeMap(mapData, ctx, canvas, offsetX, offsetY, scale); // Przekazanie przesunięcia i skali
     generateLineList(mapData, applyChanges, fetchMapData, showEditMenu); // Generowanie menu linii
@@ -118,7 +123,7 @@ window.addEventListener("resize", () => {
 
 // Ustaw początkowy rozmiar canvas
 resizeCanvas();
-loadInitialMapData(); // Załaduj mapę na start
+loadInitialMapData(fetchMapData); // Załaduj mapę na start
 
 canvas.style.cursor = "default";
 
@@ -261,62 +266,10 @@ function applyChanges(type, element) {
     fetchMapData();
 }
 
-async function uploadMap() {
-    const input = document.createElement("input");
-    input.type = "file";
-    input.accept = ".json";
-
-    input.addEventListener("change", async (event) => {
-        const file = event.target.files[0];
-        if (!file) return;
-
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            try {
-                mapData = JSON.parse(e.target.result); // Wczytaj dane do `mapData`
-                console.log("Map data loaded:", mapData);
-                fetchMapData();
-            } catch (error) {
-                console.error("Error parsing map data:", error);
-            }
-        };
-        reader.readAsText(file);
-    });
-
-    input.click(); // Otwórz okno wyboru pliku
-}
 
 document.getElementById("upload-map").addEventListener("click", uploadMap);
+document.getElementById("download-map").addEventListener("click", () => downloadMap(mapData));
 
-function downloadMap() {
-    if (!mapData) {
-        console.error("No map data to download.");
-        return;
-    }
-
-    const dataStr = JSON.stringify(mapData, null, 2); // Sformatuj dane jako JSON
-    const blob = new Blob([dataStr], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
-
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `transit-mapper-map.json`;
-    a.click();
-
-    URL.revokeObjectURL(url); // Zwolnij pamięć
-}
-
-document.getElementById("download-map").addEventListener("click", downloadMap);
-
-async function loadInitialMapData() {
-    try {
-        const response = await fetch('/map.json'); // Wczytaj dane z endpointu
-        mapData = await response.json(); // Zapisz dane w globalnej zmiennej
-        console.log("Initial map data loaded:", mapData);
-        fetchMapData(); // Rysuj mapę
-        //generateLineList(mapData, applyChanges, null, showEditMenu); // Generuj menu linii
-    } catch (error) {
-        console.error("Error loading initial map data:", error);
-    }
-}
+//resizeCanvas();
+loadInitialMapData(fetchMapData); // Załaduj mapę na start
 
