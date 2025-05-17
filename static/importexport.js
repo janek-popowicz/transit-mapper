@@ -1,4 +1,4 @@
-import { mapData, setMapData, fetchMapData} from './script.js';
+import { mapData, setMapData, fetchMapData, recentIcon} from './script.js';
 
 export async function uploadMap() {
     const input = document.createElement("input");
@@ -54,5 +54,43 @@ export async function loadInitialMapData(fetchMapData) {
     } catch (error) {
         console.error("Error loading initial map data:", error);
     }
+}
+
+export async function uploadIcon() {
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = ".svg";
+
+    input.addEventListener("change", async (event) => {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const formData = new FormData();
+        formData.append("icon", file);
+
+        try {
+            const response = await fetch("/upload-icon", {
+                method: "POST",
+                body: formData,
+            });
+
+            if (!response.ok) {
+                const error = await response.json();
+                console.error("Error uploading icon:", error.error);
+                alert(`Error: ${error.error}`);
+                return;
+            }
+
+            const result = await response.json();
+            console.log("Icon uploaded successfully:", result);
+            alert(`Icon uploaded successfully! Path: ${result.path}`);
+            recentIcon = result.path
+        } catch (error) {
+            console.error("Error uploading icon:", error);
+            alert("An error occurred while uploading the icon.");
+        }
+    });
+
+    input.click(); // Open the file dialog
 }
 

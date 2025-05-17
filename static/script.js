@@ -3,7 +3,7 @@ import { pointToSegmentDistance } from './clickHandlers.js';
 import { getMapCoordinatesFromClick } from './clickHandlers.js';
 import { showEditMenu } from './editMenu.js';
 import { generateLineList } from './lineMenu.js';
-import { uploadMap, downloadMap, loadInitialMapData } from './importexport.js';
+import { uploadMap, downloadMap, loadInitialMapData, uploadIcon } from './importexport.js';
 
 export let mapData = null; // Eksportuj mapData
 
@@ -289,6 +289,8 @@ function applyChanges(type, element) {
 
 document.getElementById("upload-map").addEventListener("click", uploadMap);
 document.getElementById("download-map").addEventListener("click", () => downloadMap(mapData));
+document.getElementById("add-icon").addEventListener("click", uploadIcon);
+export let recentIcon = null;
 
 //resizeCanvas();
 loadInitialMapData(fetchMapData); // Załaduj mapę na start
@@ -588,5 +590,86 @@ document.addEventListener("keydown", (e) => {
         showEditMenu("river", mapData.rivers[mapData.rivers.length - 1], applyChanges, fetchMapData, mapData);
 
         fetchMapData(); // Odśwież mapę
+    }
+});
+
+
+export let isPlacingIcon = false;
+export let tempIcon = null;
+export function setPlacingIcon(value) {
+    isPlacingIcon = value;
+}
+export function setTempIcon(icon) {
+    tempIcon = { ...icon }; // Skopiuj wszystkie właściwości ikony
+}
+document.getElementById("add-icon").addEventListener("click", () => {
+    isPlacingIcon = true;
+    tempIcon = {
+        id: `N${Date.now()}`, // Tymczasowe ID
+        label: "New Icon",
+        coordinates: [0, 0],
+        size: 10,
+        icon: recentIcon
+    };
+    canvas.style.cursor = "crosshair"; // Zmień kursor na krzyżyk
+});
+
+canvas.addEventListener("mousemove", (e) => {
+    if (!isPlacingIcon || !tempIcon) return;
+
+    const [mapX, mapY] = getMapCoordinatesFromClick(e, canvas, offsetX, offsetY, scale);
+
+    // Przyciąganie do całkowitych punktów
+    tempIcon.coordinates = [Math.round(mapX), Math.round(mapY)];
+
+    // Odśwież mapę i narysuj tymczasowy węzeł
+    fetchMapData();
+    ctx.save();
+    ctx.translate(
+        tempIcon.coordinates[0] * 50 * scale + canvas.width / 2 + offsetX,
+        -(tempIcon.coordinates[1] * 50 * scale - canvas.height / 2 - offsetY)
+    );
+    ctx.beginPath();
+    ctx.arc(0, 0, tempIcon.size / 5 * scale, 0, Math.PI * 2);
+    ctx.fillStyle = "black";
+    ctx.fill();
+    ctx.strokeStyle = "white";
+    ctx.lineWidth = 2;
+    ctx.stroke();
+    ctx.restore();
+});
+
+canvas.addEventListener("click", (e) => {
+    if (!isPlacingIcon || !tempIcon) return;
+
+    const [mapX, mapY] = getMapCoordinatesFromClick(e, canvas, offsetX, offsetY, scale);
+
+    // Przyciąganie do całkowitych punktów
+    tempIcon.coordinates = [Math.round(mapX), Math.round(mapY)];
+
+    if (mapData.icons.some(icon => icon.id === tempIcon.id)) {
+        // Aktualizuj istniejącą ikonę
+        const iconIndex = mapData.icons.findIndex(icon => icon.id === tempIcon.id);
+        mapData.icons[iconIndex] = { ...tempIcon };
+    } else {
+        // Dodaj nową ikonę
+        mapData.icons.push({ ...tempIcon });
+    }
+
+    // Wyłącz tryb umieszczania
+    isPlacingIcon = false;
+    tempIcon = null;
+    canvas.style.cursor = "default";
+
+    // Odśwież mapę
+    fetchMapData();
+});
+
+document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && isPlacingIcon) {
+        isPlacingIcon = false;
+        tempIcon = null;
+        canvas.style.cursor = "default";
+        fetchMapData(); // Odśwież mapę, aby usunąć tymczasową ikonę
     }
 });

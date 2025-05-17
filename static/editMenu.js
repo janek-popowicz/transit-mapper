@@ -1,4 +1,4 @@
-import { setPlacingNode, setTempNode , setDrawingSegment, setTempSegment, setDrawingRiver, setTempRiver} from './script.js';
+import { setPlacingNode, setTempNode , setDrawingSegment, setTempSegment, setDrawingRiver, setTempRiver, setPlacingIcon, setTempIcon} from './script.js';
 
 export function showEditMenu(type, element, applyChanges, fetchMapData, mapData) {
     // Usuń stare menu jeśli istnieje
@@ -40,6 +40,7 @@ export function showEditMenu(type, element, applyChanges, fetchMapData, mapData)
             <label>Coordinates: <input type="text" id="icon-coordinates" value="${element.coordinates.join(', ')}"></label><br>
             <label>Icon Path: <input type="text" id="icon-path" value="${element.icon || ''}"></label><br>
             <label>Size: <input type="number" id="icon-size" value="${element.size || 0}"></label><br>
+            <button id="edit-icon-position">Edit Position</button>
             <button id="remove-icon">Remove</button><br>
             <button id="save-icon">Save</button>
         `;
@@ -102,7 +103,7 @@ export function showEditMenu(type, element, applyChanges, fetchMapData, mapData)
                 mapData.nodes[nodeIndex] = element;
 
                 // Zaktualizuj segmenty powiązane z tym węzłem
-                updateSegmentsForNode(element);
+                // updateSegmentsForNode(element);
             }
         } else if (type === "segment") {
             element.start_node = menu.querySelector("#segment-start-node").value;
@@ -213,5 +214,15 @@ export function showEditMenu(type, element, applyChanges, fetchMapData, mapData)
         // applyChanges("river", element);
         // menu.remove();
         // fetchMapData();
+    });
+
+    menu.querySelector("#edit-icon-position")?.addEventListener("click", () => {
+        if (type === "icon") {
+            setPlacingIcon(true);
+            setTempIcon({ ...element }); // Skopiuj dane węzła do `tempNode`
+            // canvas.style.cursor = "crosshair"; // Zmień kursor na krzyżyk
+            menu.remove(); // Zamknij menu edycji
+            console.log(mapData)
+        }
     });
 }

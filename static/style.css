@@ -1,10 +1,14 @@
 h1 {
     color: #333;
+    font-size: 2em;
+    margin: 20px 0;
 }
 body {
             margin: 0;
             overflow: hidden;
             background-color:#FFFFFF;
+            font-family: Arial, sans-serif;
+            color: #333;
         }
         canvas {
             display: block;
@@ -14,77 +18,89 @@ body {
 form {
     margin-bottom: 20px;
 }
-/* Ustawienia ogólnego menu */
+/* === Menu główne === */
 .menu {
     position: absolute;
     top: 10px;
     left: 10px;
-    background-color: rgb(255, 197, 197);
-    border: 1px solid #ad0000;
+    background-color: #FFE4E4;
+    border: 1px solid #AD0000;
     border-radius: 5px;
     padding: 10px;
     box-shadow: 0 2px 5px rgba(17, 38, 155, 0.2);
     z-index: 1000;
     min-width: 400px;
 }
+
 .menu button {
     display: block;
     width: 100%;
     margin-bottom: 10px;
     padding: 10px;
-    font-size: 20px;
+    font-size: 1em;
     cursor: pointer;
-    border: 1px solid #ccc;
+    border: 1px solid #CCC;
     border-radius: 3px;
-    background-color: #f9f9f9;
+    background-color: #F9F9F9;
+    transition: background-color 0.2s ease;
 }
+
 .menu button:hover {
-    background-color: #e0e0e0;
+    background-color: #E0E0E0;
 }
-/* Ustawienia kontekstowego menu */
+
+/* === Menu edycji === */
 .edit-menu {
     position: absolute;
     left: 10px;
     bottom: 10px;
-    background-color: rgb(255, 197, 197);
-    border: 1px solid #ad0000;
+    background-color: #FFE4E4;
+    border: 1px solid #AD0000;
     border-radius: 5px;
     padding: 10px;
     box-shadow: 0 2px 5px rgba(17, 38, 155, 0.2);
     z-index: 1000;
     min-width: 400px;
 }
+
 .edit-menu h3 {
     margin-top: 0;
     font-size: 1.1em;
 }
+
 .edit-menu label {
     display: block;
     margin-bottom: 8px;
+    font-size: 0.9em;
 }
+
 .edit-menu input, .edit-menu button {
     font-size: 1em;
     margin-top: 2px;
 }
+
 .edit-menu button {
     margin-top: 10px;
     width: 100%;
     padding: 8px;
     border-radius: 3px;
-    border: 1px solid #ccc;
-    background: #f9f9f9;
+    border: 1px solid #CCC;
+    background: #F9F9F9;
     cursor: pointer;
+    transition: background-color 0.2s ease;
 }
+
 .edit-menu button:hover {
-    background: #e0e0e0;
+    background: #E0E0E0;
 }
-/* Ustawienia menu linii */
+
+/* === Menu linii === */
 .line-menu {
     position: absolute;
     top: 10px;
     right: 10px;
-    background-color: #f9f9f9;
-    border: 1px solid #ccc;
+    background-color: #FFE4E4;
+    border: 1px solid #AD0000;
     border-radius: 5px;
     padding: 10px;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
@@ -109,15 +125,16 @@ form {
 .line-menu li {
     margin-bottom: 10px;
     padding: 10px;
-    background-color: #fff;
-    border: 1px solid #ccc;
+    background-color: #FFF;
+    border: 1px solid #CCC;
     border-radius: 3px;
     cursor: pointer;
     text-align: center;
+    transition: background-color 0.2s ease;
 }
 
 .line-menu li:hover {
-    background-color: #e0e0e0;
+    background-color: #E0E0E0;
 }
 
 #line-list {
@@ -127,13 +144,14 @@ form {
 #line-list button {
     width: 100%;
     padding: 10px;
-    font-size: 16px;
+    font-size: 1em;
     cursor: pointer;
-    border: 1px solid #ccc;
+    border: 1px solid #CCC;
     border-radius: 3px;
-    background-color: #f9f9f9;
+    background-color: #F9F9F9;
+    transition: background-color 0.2s ease;
 }
 
 #line-list button:hover {
-    background-color: #e0e0e0;
+    background-color: #E0E0E0;
 }
