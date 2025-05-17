@@ -93,7 +93,7 @@ function drawGrid(ctx, data, cellSize = 50, color = "#e0e0e0") {
 }
 
 export function visualizeMap(data, ctx, canvas, offsetX = 0, offsetY = 0, scale = 1) {
-    console.log(data)
+  //  console.log(data)
     // Wyczyszczenie canvas
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
