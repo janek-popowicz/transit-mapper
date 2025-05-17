@@ -78,3 +78,62 @@ form {
 .edit-menu button:hover {
     background: #e0e0e0;
 }
+/* Ustawienia menu linii */
+.line-menu {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background-color: #f9f9f9;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    padding: 10px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    z-index: 1000;
+    width: 250px;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.line-menu h3 {
+    margin-top: 0;
+    font-size: 1.2em;
+    text-align: center;
+}
+
+.line-menu ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.line-menu li {
+    margin-bottom: 10px;
+    padding: 10px;
+    background-color: #fff;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    cursor: pointer;
+    text-align: center;
+}
+
+.line-menu li:hover {
+    background-color: #e0e0e0;
+}
+
+#line-list {
+    margin-bottom: 10px;
+}
+
+#line-list button {
+    width: 100%;
+    padding: 10px;
+    font-size: 16px;
+    cursor: pointer;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    background-color: #f9f9f9;
+}
+
+#line-list button:hover {
+    background-color: #e0e0e0;
+}

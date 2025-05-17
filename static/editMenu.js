@@ -9,8 +9,11 @@ export function showEditMenu(type, element, applyChanges, fetchMapData) {
     if (type === "node") {
         menu.innerHTML = `
             <h3>Edit Node</h3>
+            <label>ID: <input type="text" id="node-id" value="${element.id || ''}" readonly></label><br>
             <label>Label: <input type="text" id="node-label" value="${element.label || ''}"></label><br>
-            <label>Coordinates: <input type="text" id="node-coordinates" value="${element.coordinates.join(', ')}"></label><br>
+            <label>Coordinates: <input type="text" id="node-coordinates" value="${element.coordinates.join(', ')}" readonly></label><br>
+            <label>Label Position: <input type="text" id="node-label-position" value="${element.label_position.join(', ')}"></label><br>
+            <label>Label text rotation: <input type="number" id="node-label-text-degree" value="${element.label_text_degree || 90}"></label><br>
             <label>Type: <input type="text" id="node-type" value="${element.type || ''}"></label><br>
             <label>Size: <input type="number" id="node-size" value="${element.size || 0}"></label><br>
             <button id="save-node">Save</button>
@@ -46,6 +49,7 @@ export function showEditMenu(type, element, applyChanges, fetchMapData) {
     } else if (type === "line") {
         menu.innerHTML = `
             <h3>Edit Line</h3>
+            <label>ID: <input type="text" id="line-id" value="${element.line_id || ''}" readonly></label><br>
             <label>Label: <input type="text" id="line-label" value="${element.label || ''}"></label><br>
             <label>Color: <input type="color" id="line-color" value="${element.color || '#000000'}"></label><br>
             <label>Thickness: <input type="number" id="line-thickness" value="${element.thickness || 0}"></label><br>
@@ -78,6 +82,8 @@ export function showEditMenu(type, element, applyChanges, fetchMapData) {
     menu.querySelector("button").addEventListener("click", () => {
         if (type === "node") {
             element.label = menu.querySelector("#node-label").value;
+            element.label_position = menu.querySelector("#node-label-position").value.split(',').map(Number);
+            element.label_text_degree = parseInt(menu.querySelector("#node-label-text-degree").value, 10);
             element.coordinates = menu.querySelector("#node-coordinates").value.split(',').map(Number);
             element.type = menu.querySelector("#node-type").value;
             element.size = parseInt(menu.querySelector("#node-size").value, 10);
@@ -97,6 +103,7 @@ export function showEditMenu(type, element, applyChanges, fetchMapData) {
             element.width = parseInt(menu.querySelector("#river-width").value, 10);
             element.color = menu.querySelector("#river-color").value;
         } else if (type === "line") {
+            element.line_id = menu.querySelector("#line-id").value;
             element.label = menu.querySelector("#line-label").value;
             element.color = menu.querySelector("#line-color").value;
             element.thickness = parseInt(menu.querySelector("#line-thickness").value, 10);

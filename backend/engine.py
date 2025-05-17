@@ -15,15 +15,15 @@ class Engine:
         self.import_from_json("userdata/map.json")  # Wczytaj dane z map.json
 
     # Node Operations
-    def add_node(self, node_id: str, label: str, coordinates: tuple, node_type: str):
+    def add_node(self, node_id: str, label: str, coordinates: tuple, node_type: str, label_position: tuple = (10, 10), label_text_degree: int = 90, size: int = 10):
         """
         Add a new node to the map.
         """
-        node = Node(node_id, label, coordinates, node_type)
+        node = Node(node_id, label, coordinates, node_type, label_position, label_text_degree, size)
         self.map_data.add_node(node)
         return {"status": "success", "message": f"Node {node_id} added."}
 
-    def edit_node(self, node_id: str, label: str = None, coordinates: tuple = None, node_type: str = None, size: int = None):
+    def edit_node(self, node_id: str, label: str = None, coordinates: tuple = None, node_type: str = None, size: int = None, label_position: tuple = None, label_text_degree: int = None):
         """
         Edit an existing node.
         """
@@ -36,6 +36,10 @@ class Engine:
             node.coordinates = coordinates
         if node_type:
             node.type = node_type
+        if label_position:
+            node.label_position = label_position
+        if label_text_degree is not None:
+            node.label_text_degree = label_text_degree
         if size is not None:
             node.size = size
         return {"status": "success", "message": f"Node {node_id} updated."}

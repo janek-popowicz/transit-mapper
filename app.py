@@ -97,7 +97,9 @@ def edit_node():
         label=data.get("label"),
         coordinates=tuple(data.get("coordinates", [])),
         node_type=data.get("type"),
-        size=data.get("size")
+        size=data.get("size"),
+        label_position=data.get("label_position"),
+        label_text_degree=data.get("label_text_degree")
     )
     return jsonify(result)
 
@@ -179,18 +181,28 @@ def edit_line():
     data = request.json
     print("Received data for line:", data)  # Loguj dane w terminalu
 
-    line_id = data.get("id")
+    line_id = data.get("line_id")
+    if not line_id:
+        return jsonify({"status": "error", "message": "Line ID is missing."}), 400
+    print("line id ", line_id)
     line = engine.map_data.get_line(line_id)
+    print(line)
     if not line:
-        return jsonify({"status": "error", "message": f"Line with ID {line_id} does not exist."}), 404
+        # Jeśli linia nie istnieje, utwórz nową
+        
+        engine.add_line(line_id, data.get("label", f"Line {line_id}"),
+                         data.get("color", "#000000"), data.get("thickness", 1))
+        message = f"Line {line_id} created."
+    else:
+        # Aktualizuj właściwości linii
+        if "label" in data:
+            line.label = data["label"]
+        if "color" in data:
+            line.color = data["color"]
+        if "thickness" in data:
+            line.thickness = data["thickness"]
+        message = f"Line {line_id} updated."
 
-    # Aktualizuj właściwości linii
-    if "label" in data:
-        line.label = data["label"]
-    if "color" in data:
-        line.color = data["color"]
-    if "thickness" in data:
-        line.thickness = data["thickness"]
 
     return jsonify({"status": "success", "message": f"Line {line_id} updated."})
 

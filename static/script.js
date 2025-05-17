@@ -2,6 +2,7 @@ import { visualizeMap } from './draw.js';
 import { pointToSegmentDistance } from './clickHandlers.js';
 import { getMapCoordinatesFromClick } from './clickHandlers.js';
 import { showEditMenu } from './editMenu.js';
+import { generateLineList } from './lineMenu.js';
 
 let mapData = null; // Globalna zmienna na dane mapy
 
@@ -19,7 +20,9 @@ function resizeCanvas() {
 async function fetchMapData() {
     const response = await fetch('/get_map');
     mapData = await response.json(); // Zapisz dane w globalnej zmiennej
+    console.log("Fetched map data:", mapData); // Loguj dane mapy
     visualizeMap(mapData, ctx, canvas, offsetX, offsetY, scale); // Przekazanie przesunięcia i skali
+    generateLineList(mapData, applyChanges, fetchMapData, showEditMenu); // Generowanie menu linii
 }
 
 // Przesuwanie mapy
