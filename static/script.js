@@ -18,8 +18,6 @@ function resizeCanvas() {
 
 // Funkcja do pobierania danych mapy z backendu
 async function fetchMapData() {
-    const response = await fetch('/get_map');
-    mapData = await response.json(); // Zapisz dane w globalnej zmiennej
     console.log("Fetched map data:", mapData); // Loguj dane mapy
     visualizeMap(mapData, ctx, canvas, offsetX, offsetY, scale); // Przekazanie przesunięcia i skali
     generateLineList(mapData, applyChanges, fetchMapData, showEditMenu); // Generowanie menu linii
@@ -55,13 +53,14 @@ canvas.addEventListener("mousemove", (e) => {
         offsetY += dy;
         lastMouseX = e.clientX;
         lastMouseY = e.clientY;
-        debounceFetchMapData(); // Ogranicz liczbę zapytań
+        debounceFetchMapData();
     }
 });
 
 canvas.addEventListener("mouseup", () => {
     isDragging = false;
     canvas.style.cursor = "default";
+    fetchMapData();
 });
 
 canvas.addEventListener("mouseleave", () => {
@@ -109,14 +108,7 @@ function applyZoom(zoomFactor) {
     fetchMapData(); // Ponowne rysowanie mapy z nową skalą
 }
 
-// Obsługa przycisków zoomu
-document.querySelector('.menu button:nth-child(5)').addEventListener('click', () => {
-    applyZoom(1.1); // Powiększ widok
-});
 
-document.querySelector('.menu button:nth-child(6)').addEventListener('click', () => {
-    applyZoom(0.9); // Pomniejsz widok
-});
 
 // Nasłuchiwanie zdarzenia zmiany rozmiaru okna
 window.addEventListener("resize", () => {
@@ -126,9 +118,8 @@ window.addEventListener("resize", () => {
 
 // Ustaw początkowy rozmiar canvas
 resizeCanvas();
-fetchMapData(); // Załaduj mapę na start
+loadInitialMapData(); // Załaduj mapę na start
 
-// Ustaw domyślny kursor na "grab"
 canvas.style.cursor = "default";
 
 
@@ -158,7 +149,7 @@ canvas.addEventListener("click", (e) => {
     });
 
     if (clickedNode) {
-        showEditMenu("node", clickedNode, applyChanges, fetchMapData);
+        showEditMenu("node", clickedNode, applyChanges, fetchMapData, mapData);
         console.log("Kliknięto w node'a:", clickedNode);
         return;
     }
@@ -180,7 +171,7 @@ canvas.addEventListener("click", (e) => {
     });
     
     if (clickedSegment) {
-        showEditMenu("segment", clickedSegment, applyChanges, fetchMapData);
+        showEditMenu("segment", clickedSegment, applyChanges, fetchMapData, mapData);
         console.log("Kliknięto w segment:", clickedSegment);
         return;
     }
@@ -201,7 +192,7 @@ canvas.addEventListener("click", (e) => {
     });
     
     if (clickedIcon) {
-        showEditMenu("icon", clickedIcon, applyChanges, fetchMapData);
+        showEditMenu("icon", clickedIcon, applyChanges, fetchMapData, mapData);
         console.log("Kliknięto w ikonę:", clickedIcon);
         return;
     }
@@ -223,53 +214,109 @@ canvas.addEventListener("click", (e) => {
     });
     
     if (clickedRiver) {
-        showEditMenu("river", clickedRiver, applyChanges, fetchMapData);
+        showEditMenu("river", clickedRiver, applyChanges, fetchMapData, mapData);
         console.log("Kliknięto w rzekę:", clickedRiver);
         return;
     }
 });
 
-async function applyChanges(type, element) {
-    console.log("Sending data to backend:", { type, element }); // Loguj dane
-    let endpoint;
+function applyChanges(type, element) {
+    console.log("Applying changes locally:", { type, element });
 
-    // Wybierz odpowiedni endpoint na podstawie typu
     if (type === "node") {
-        endpoint = "/edit_node";
+        const nodeIndex = mapData.nodes.findIndex(node => node.id === element.id);
+        if (nodeIndex !== -1) {
+            mapData.nodes[nodeIndex] = element; // Aktualizuj istniejący node
+        } else {
+            mapData.nodes.push(element); // Dodaj nowy node
+        }
     } else if (type === "icon") {
-        endpoint = "/edit_icon";
+        const iconIndex = mapData.icons.findIndex(icon => icon.id === element.id);
+        if (iconIndex !== -1) {
+            mapData.icons[iconIndex] = element; // Aktualizuj istniejącą ikonę
+        } else {
+            mapData.icons.push(element); // Dodaj nową ikonę
+        }
     } else if (type === "segment") {
-        endpoint = "/edit_segment";
-    } else if (type === "river") {
-        endpoint = "/edit_river";
+        const segmentIndex = mapData.segments.findIndex(segment => segment.id === element.id);
+        if (segmentIndex !== -1) {
+            mapData.segments[segmentIndex] = element; // Aktualizuj istniejący segment
+        } else {
+            mapData.segments.push(element); // Dodaj nowy segment
+        }
     } else if (type === "line") {
-        endpoint = "/edit_line";
+        const lineIndex = mapData.lines.findIndex(line => line.id === element.id);
+        if (lineIndex !== -1) {
+            mapData.lines[lineIndex] = element; // Aktualizuj istniejącą linię
+        } else {
+            mapData.lines.push(element); // Dodaj nową linię
+        }
     } else if (type === "map_settings") {
-        endpoint = "/edit_map_settings";
+        Object.assign(mapData, element); // Aktualizuj ustawienia mapy
     } else {
         console.error(`Unsupported type: ${type}`);
         return;
     }
 
-    try {
-        const response = await fetch(endpoint, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify(element), // Przesyłaj cały obiekt, w tym id
-        });
-
-        if (!response.ok) {
-            const error = await response.json();
-            console.error(`Failed to update ${type}:`, error.message);
-            return;
-        }
-
-        const result = await response.json();
-        console.log(`${type} updated successfully:`, result.message);
-    } catch (error) {
-        console.error(`Error updating ${type}:`, error);
-    }
-    fetchMapData(); // Odśwież mapę po zapisaniu zmian
+    fetchMapData();
 }
+
+async function uploadMap() {
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = ".json";
+
+    input.addEventListener("change", async (event) => {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            try {
+                mapData = JSON.parse(e.target.result); // Wczytaj dane do `mapData`
+                console.log("Map data loaded:", mapData);
+                fetchMapData();
+            } catch (error) {
+                console.error("Error parsing map data:", error);
+            }
+        };
+        reader.readAsText(file);
+    });
+
+    input.click(); // Otwórz okno wyboru pliku
+}
+
+document.getElementById("upload-map").addEventListener("click", uploadMap);
+
+function downloadMap() {
+    if (!mapData) {
+        console.error("No map data to download.");
+        return;
+    }
+
+    const dataStr = JSON.stringify(mapData, null, 2); // Sformatuj dane jako JSON
+    const blob = new Blob([dataStr], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `transit-mapper-map.json`;
+    a.click();
+
+    URL.revokeObjectURL(url); // Zwolnij pamięć
+}
+
+document.getElementById("download-map").addEventListener("click", downloadMap);
+
+async function loadInitialMapData() {
+    try {
+        const response = await fetch('/map.json'); // Wczytaj dane z endpointu
+        mapData = await response.json(); // Zapisz dane w globalnej zmiennej
+        console.log("Initial map data loaded:", mapData);
+        fetchMapData(); // Rysuj mapę
+        //generateLineList(mapData, applyChanges, null, showEditMenu); // Generuj menu linii
+    } catch (error) {
+        console.error("Error loading initial map data:", error);
+    }
+}
+

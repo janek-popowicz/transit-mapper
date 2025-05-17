@@ -1,4 +1,4 @@
-export function showEditMenu(type, element, applyChanges, fetchMapData) {
+export function showEditMenu(type, element, applyChanges, fetchMapData, mapData) {
     // Usuń stare menu jeśli istnieje
     document.querySelectorAll('.edit-menu').forEach(m => m.remove());
 
@@ -16,6 +16,7 @@ export function showEditMenu(type, element, applyChanges, fetchMapData) {
             <label>Label text rotation: <input type="number" id="node-label-text-degree" value="${element.label_text_degree || 90}"></label><br>
             <label>Type: <input type="text" id="node-type" value="${element.type || ''}"></label><br>
             <label>Size: <input type="number" id="node-size" value="${element.size || 0}"></label><br>
+            <button id="remove-node">Remove</button>
             <button id="save-node">Save</button>
         `;
     } else if (type === "segment") {
@@ -26,6 +27,7 @@ export function showEditMenu(type, element, applyChanges, fetchMapData) {
             <label>End Node: <input type="text" id="segment-end-node" value="${element.end_node || ''}"></label><br>
             <label>Lines: <input type="text" id="segment-lines" value="${element.lines.join(', ')}"></label><br>
             <label>Route: <textarea id="segment-route">${element.route.map(coord => coord.join(', ')).join('; ')}</textarea></label><br>
+            <button id="remove-segment">Remove</button>
             <button id="save-segment">Save</button>
         `;
     } else if (type === "icon") {
@@ -35,6 +37,7 @@ export function showEditMenu(type, element, applyChanges, fetchMapData) {
             <label>Coordinates: <input type="text" id="icon-coordinates" value="${element.coordinates.join(', ')}"></label><br>
             <label>Icon Path: <input type="text" id="icon-path" value="${element.icon || ''}"></label><br>
             <label>Size: <input type="number" id="icon-size" value="${element.size || 0}"></label><br>
+            <button id="remove-icon">Remove</button><br>
             <button id="save-icon">Save</button>
         `;
     } else if (type === "river") {
@@ -44,15 +47,17 @@ export function showEditMenu(type, element, applyChanges, fetchMapData) {
             <label>Route: <textarea id="river-route">${element.route.map(coord => coord.join(', ')).join('; ')}</textarea></label><br>
             <label>Width: <input type="number" id="river-width" value="${element.width || 0}"></label><br>
             <label>Color: <input type="color" id="river-color" value="${element.color || '#000000'}"></label><br>
+            <button id="remove-river">Remove</button><br>
             <button id="save-river">Save</button>
         `;
     } else if (type === "line") {
         menu.innerHTML = `
             <h3>Edit Line</h3>
-            <label>ID: <input type="text" id="line-id" value="${element.line_id || ''}" readonly></label><br>
+            <label>ID: <input type="text" id="line-id" value="${element.id || ''}" readonly></label><br>
             <label>Label: <input type="text" id="line-label" value="${element.label || ''}"></label><br>
             <label>Color: <input type="color" id="line-color" value="${element.color || '#000000'}"></label><br>
             <label>Thickness: <input type="number" id="line-thickness" value="${element.thickness || 0}"></label><br>
+            <button id="remove-line">Remove</button><br>
             <button id="save-line">Save</button>
         `;
     } else if (type === "map_settings") {
@@ -79,7 +84,7 @@ export function showEditMenu(type, element, applyChanges, fetchMapData) {
     }, 0);
 
     // Obsługa zapisu zmian
-    menu.querySelector("button").addEventListener("click", () => {
+    menu.querySelector("#save-" + type).addEventListener("click", () => {
         if (type === "node") {
             element.label = menu.querySelector("#node-label").value;
             element.label_position = menu.querySelector("#node-label-position").value.split(',').map(Number);
@@ -103,7 +108,7 @@ export function showEditMenu(type, element, applyChanges, fetchMapData) {
             element.width = parseInt(menu.querySelector("#river-width").value, 10);
             element.color = menu.querySelector("#river-color").value;
         } else if (type === "line") {
-            element.line_id = menu.querySelector("#line-id").value;
+            element.id = menu.querySelector("#line-id").value;
             element.label = menu.querySelector("#line-label").value;
             element.color = menu.querySelector("#line-color").value;
             element.thickness = parseInt(menu.querySelector("#line-thickness").value, 10);
@@ -116,5 +121,35 @@ export function showEditMenu(type, element, applyChanges, fetchMapData) {
         applyChanges(type, element);
         menu.remove();
         fetchMapData();
+    });
+
+    menu.querySelector("#remove-" + type).addEventListener("click", () => {
+        if (type === "node") {
+            // Usuń węzeł i powiązane segmenty
+            mapData.nodes = mapData.nodes.filter(node => node.id !== element.id);
+            mapData.segments = mapData.segments.filter(segment => 
+                segment.start_node !== element.id && segment.end_node !== element.id
+            );
+        } else if (type === "segment") {
+            // Usuń segment
+            mapData.segments = mapData.segments.filter(segment => segment.id !== element.id);
+        } else if (type === "line") {
+            // Usuń linię i jej odniesienia w segmentach
+            console.log(mapData.lines)
+            mapData.lines = mapData.lines.filter(line => line.id !== element.id);
+            mapData.segments.forEach(segment => {
+                segment.lines = segment.lines.filter(lineId => lineId !== element.id);
+            });
+        } else if (type === "icon") {
+            // Usuń ikonę
+            mapData.icons = mapData.icons.filter(icon => icon.id !== element.id);
+        } else if (type === "river") {
+            // Usuń rzekę
+            mapData.rivers = mapData.rivers.filter(river => river.id !== element.id);
+        }
+
+        // Zaktualizuj mapę i zamknij menu
+        fetchMapData();
+        menu.remove();
     });
 }

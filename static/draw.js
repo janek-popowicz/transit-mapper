@@ -93,6 +93,7 @@ function drawGrid(ctx, data, cellSize = 50, color = "#e0e0e0") {
 }
 
 export function visualizeMap(data, ctx, canvas, offsetX = 0, offsetY = 0, scale = 1) {
+    console.log(data)
     // Wyczyszczenie canvas
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -160,7 +161,7 @@ export function visualizeMap(data, ctx, canvas, offsetX = 0, offsetY = 0, scale 
         if (route && route.length > 1) {
             // Obliczenie całkowitej grubości wszystkich linii w segmencie
             const lineThicknesses = segment.lines.map(lineId => {
-                const line = data.lines.find(l => l.line_id === lineId);
+                const line = data.lines.find(l => l.id === lineId);
                 return line ? line.thickness || 2 : 0;
             });
 
@@ -171,8 +172,9 @@ export function visualizeMap(data, ctx, canvas, offsetX = 0, offsetY = 0, scale 
 
             // Rysowanie każdej linii w segmencie
             segment.lines.forEach((lineId, index) => {
-                const line = data.lines.find(l => l.line_id === lineId);
-                if (!line) return; // Jeśli linia nie istnieje, pomiń
+                const line = data.lines.find(l => l.id === lineId);
+                if (!line){console.warn(`Nie znaleziono linii o ID: ${lineId}`);  // Jeśli linia nie istnieje, pomiń
+                    return;}  // Jeśli linia nie istnieje, pomiń
 
                 const color = line.color || "black"; // Domyślny kolor
                 const thickness = line.thickness; // Pobranie grubości linii z JSON-a
