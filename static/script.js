@@ -136,7 +136,7 @@ canvas.style.cursor = "default";
 // Sprawdzanie kliknięć w obiekty na mapie
 canvas.addEventListener("click", (e) => {
 
-    if (isDragging || isDrawingSegment || isPlacingNode) return;
+    if (isDragging || isDrawingSegment || isPlacingNode || isDrawingRiver) return;
     if (!mapData) return;
 
     const [mapX, mapY] = getMapCoordinatesFromClick(e, canvas, offsetX, offsetY, scale);
@@ -268,7 +268,15 @@ function applyChanges(type, element) {
         } else {
             mapData.lines.push(element); // Dodaj nową linię
         }
-    } else if (type === "map_settings") {
+    } else if (type === "river") {
+        const riverIndex = mapData.rivers.findIndex(river => river.id === element.id);
+        if (riverIndex !== -1) {
+            mapData.rivers[riverIndex] = element; // Aktualizuj istniejącą rzekę
+        } else {
+            mapData.rivers.push(element); // Dodaj nową rzekę
+        }
+    }
+    else if (type === "map_settings") {
         Object.assign(mapData, element); // Aktualizuj ustawienia mapy
     } else {
         console.error(`Unsupported type: ${type}`);
@@ -485,3 +493,100 @@ function updateSegmentsForNode(node) {
         }
     });
 }
+
+export let isDrawingRiver = false;
+export let tempRiver = null; // Tymczasowa rzeka
+
+export function setDrawingRiver(value) {
+    isDrawingRiver = value;
+}
+
+export function setTempRiver(river) {
+    tempRiver = { ...river }; // Skopiuj wszystkie właściwości rzeki
+}
+document.getElementById("add-river").addEventListener("click", () => {
+    isDrawingRiver = true;
+    tempRiver = {
+        id: `R${Date.now()}`, // Tymczasowe ID
+        label: "New River",
+        route: [], // Punkty trasy
+        width: 20, // Domyślna szerokość
+        color: "#0000FF" // Domyślny kolor
+    };
+    canvas.style.cursor = "crosshair"; // Zmień kursor na krzyżyk
+});
+canvas.addEventListener("click", (e) => {
+    if (!isDrawingRiver || !tempRiver) return;
+
+    const [mapX, mapY] = getMapCoordinatesFromClick(e, canvas, offsetX, offsetY, scale);
+    const snappedCoordinates = [Math.round(mapX), Math.round(mapY)];
+
+    // Dodaj punkt do trasy rzeki
+    tempRiver.route.push(snappedCoordinates);
+
+    fetchMapData(); // Odśwież mapę, aby narysować tymczasową rzekę
+});
+canvas.addEventListener("mousemove", (e) => {
+    if (!isDrawingRiver || !tempRiver) return;
+
+    const [mapX, mapY] = getMapCoordinatesFromClick(e, canvas, offsetX, offsetY, scale);
+    const snappedCoordinates = [Math.round(mapX), Math.round(mapY)];
+
+    fetchMapData(); // Odśwież mapę
+    ctx.save();
+    ctx.beginPath();
+    ctx.strokeStyle = "red";
+    ctx.lineWidth = 2;
+
+
+    // Rysuj trasę rzeki
+    const fullRoute = [...tempRiver.route, snappedCoordinates];
+    for (let i = 0; i < fullRoute.length - 1; i++) {
+        const [x1, y1] = fullRoute[i];
+        const [x2, y2] = fullRoute[i + 1];
+        ctx.moveTo(x1 * 50 * scale + canvas.width / 2 + offsetX, -(y1 * 50 * scale - canvas.height / 2 - offsetY));
+        ctx.lineTo(x2 * 50 * scale + canvas.width / 2 + offsetX, -(y2 * 50 * scale - canvas.height / 2 - offsetY));
+    }
+
+    ctx.stroke();
+    ctx.restore();
+});
+document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && isDrawingRiver) {
+        isDrawingRiver = false;
+        tempRiver = null;
+        canvas.style.cursor = "default";
+        fetchMapData(); // Odśwież mapę, aby usunąć tymczasową rzekę
+    }
+});
+canvas.addEventListener("dblclick", () => {
+    if (!isDrawingRiver || !tempRiver) return;
+
+    // Dodaj rzekę do mapData
+    mapData.rivers.push({ ...tempRiver });
+
+    isDrawingRiver = false;
+    tempRiver = null;
+    canvas.style.cursor = "default";
+
+    // Otwórz menu edycji rzeki
+    showEditMenu("river", mapData.rivers[mapData.rivers.length - 1], applyChanges, fetchMapData, mapData);
+
+    fetchMapData(); // Odśwież mapę
+});
+
+document.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" && isDrawingRiver) {
+        // Dodaj rzekę do mapData
+        mapData.rivers.push({ ...tempRiver });
+
+        isDrawingRiver = false;
+        tempRiver = null;
+        canvas.style.cursor = "default";
+
+        // Otwórz menu edycji rzeki
+        showEditMenu("river", mapData.rivers[mapData.rivers.length - 1], applyChanges, fetchMapData, mapData);
+
+        fetchMapData(); // Odśwież mapę
+    }
+});

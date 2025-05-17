@@ -1,4 +1,4 @@
-import { setPlacingNode, setTempNode , setDrawingSegment, setTempSegment} from './script.js';
+import { setPlacingNode, setTempNode , setDrawingSegment, setTempSegment, setDrawingRiver, setTempRiver} from './script.js';
 
 export function showEditMenu(type, element, applyChanges, fetchMapData, mapData) {
     // Usuń stare menu jeśli istnieje
@@ -50,6 +50,7 @@ export function showEditMenu(type, element, applyChanges, fetchMapData, mapData)
             <label>Route: <textarea id="river-route">${element.route.map(coord => coord.join(', ')).join('; ')}</textarea></label><br>
             <label>Width: <input type="number" id="river-width" value="${element.width || 0}"></label><br>
             <label>Color: <input type="color" id="river-color" value="${element.color || '#000000'}"></label><br>
+            <button id="edit-river-path">Edit Path</button>
             <button id="remove-river">Remove</button><br>
             <button id="save-river">Save</button>
         `;
@@ -188,5 +189,29 @@ export function showEditMenu(type, element, applyChanges, fetchMapData, mapData)
             menu.remove(); // Zamknij menu edycji
             console.log(mapData)
         }
+    });
+
+    menu.querySelector("#edit-river-path")?.addEventListener("click", () => {
+        if (type === "river") {
+            setDrawingRiver(true);
+            setTempRiver({
+                id: element.id,
+                label: element.label,
+                route: [element.route[0]], // Zaczynamy od istniejącego węzła początkowego
+                width: element.width,
+                color: element.color
+            });
+            // canvas.style.cursor = "crosshair"; // Zmień kursor na krzyżyk
+            menu.remove(); // Zamknij menu edycji
+            console.log(mapData)
+        }
+        // element.label = menu.querySelector("#river-label").value;
+        // element.route = menu.querySelector("#river-route").value.split(';').map(coord => coord.split(',').map(Number));
+        // element.width = parseInt(menu.querySelector("#river-width").value, 10);
+        // element.color = menu.querySelector("#river-color").value;
+
+        // applyChanges("river", element);
+        // menu.remove();
+        // fetchMapData();
     });
 }
