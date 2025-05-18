@@ -383,6 +383,10 @@ document.addEventListener("keydown", (e) => {
     }
 });
 
+export let selectedLines = []; // Lista zcheckboxów linii
+export function setSelectedLines(lines) {
+    selectedLines = lines;
+}
 export let isDrawingSegment = false;
 export let tempSegment = null; // Tymczasowy segment
 export function setDrawingSegment(value) {
@@ -392,19 +396,15 @@ export function setTempSegment(segment) {
     tempSegment = { ...segment }; // Skopiuj wszystkie właściwości segmentu
 }
 document.getElementById("add-segment").addEventListener("click", () => {
+    console.log("Przypisywanie linii do segmentu")
     isDrawingSegment = true;
     tempSegment = {
         id: `S${Date.now()}`, // Tymczasowe ID
         start_node: null,
         end_node: null,
         route: [], // Punkty pośrednie
-        lines: [] // Linie przypisane do segmentu
+        lines: [...selectedLines] // Użyj kopii selectedLines zamiast referencji
     };
-
-    // Pobierz zaznaczone linie z menu linii
-    const selectedLines = [];
-    generateLineList(mapData, applyChanges, fetchMapData, showEditMenu, selectedLines);
-
     canvas.style.cursor = "crosshair"; // Zmień kursor na krzyżyk
 });
 canvas.addEventListener("click", (e) => {
@@ -426,6 +426,10 @@ canvas.addEventListener("click", (e) => {
             tempSegment.route.push([...clickedNode.coordinates]);
         } else {
             console.warn("Musisz zacząć od węzła!");
+            // resetowanie flag
+            isDrawingSegment = false;
+            tempSegment = null;
+            canvas.style.cursor = "default";
         }
     } else if (clickedNode) {
         // Ustaw węzeł końcowy i zakończ segment

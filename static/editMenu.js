@@ -1,4 +1,7 @@
-import { setPlacingNode, setTempNode , setDrawingSegment, setTempSegment, setDrawingRiver, setTempRiver, setPlacingIcon, setTempIcon} from './script.js';
+import { setPlacingNode, setTempNode , 
+    setDrawingSegment, setTempSegment, setDrawingRiver, setTempRiver, 
+    setPlacingIcon, setTempIcon, selectedLines, setSelectedLines} from './script.js';
+import { generateLineList } from './lineMenu.js';
 
 export function showEditMenu(type, element, applyChanges, fetchMapData, mapData) {
     // Usuń stare menu jeśli istnieje
@@ -22,6 +25,10 @@ export function showEditMenu(type, element, applyChanges, fetchMapData, mapData)
             <button id="save-node">Save</button>
         `;
     } else if (type === "segment") {
+        setSelectedLines([...element.lines]); // Prawidłowo - przekazujemy nową tablicę
+        generateLineList(mapData, applyChanges, fetchMapData, showEditMenu); // Odśwież listę linii z checkboxami
+        console.log("Clicking segment")
+
         menu.innerHTML = `
             <h3>Edit Segment</h3>
             <label>ID: <input type="text" id="segment-id" value="${element.id || ''}" readonly></label><br>
@@ -79,7 +86,13 @@ export function showEditMenu(type, element, applyChanges, fetchMapData, mapData)
 
     // Zamknij menu po kliknięciu poza nim
     function handleOutsideClick(event) {
+        // Sprawdź, czy kliknięcie nastąpiło poza menu
         if (!menu.contains(event.target)) {
+            // Ignoruj kliknięcia na checkboxach
+            if (event.target.tagName === "INPUT" && event.target.type === "checkbox") {
+                return;
+            }
+
             menu.remove();
             document.removeEventListener('mousedown', handleOutsideClick);
         }
@@ -108,8 +121,13 @@ export function showEditMenu(type, element, applyChanges, fetchMapData, mapData)
         } else if (type === "segment") {
             element.start_node = menu.querySelector("#segment-start-node").value;
             element.end_node = menu.querySelector("#segment-end-node").value;
-            element.lines = menu.querySelector("#segment-lines").value.split(',').map(s => s.trim());
+            element.lines = [...selectedLines]; // Przypisz globalną listę selectedLines
+            console.log("Saving segment")
             element.route = menu.querySelector("#segment-route").value.split(';').map(coord => coord.split(',').map(Number));
+
+            applyChanges("segment", element); // Zapisz zmiany w mapData
+            menu.remove(); // Zamknij menu edycji
+            fetchMapData(); // Odśwież mapę
         } else if (type === "icon") {
             element.label = menu.querySelector("#icon-label").value;
             element.coordinates = menu.querySelector("#icon-coordinates").value.split(',').map(Number);
@@ -184,11 +202,15 @@ export function showEditMenu(type, element, applyChanges, fetchMapData, mapData)
                 start_node: element.start_node,
                 end_node: null,
                 route: [element.route[0]], // Zaczynamy od istniejącego węzła początkowego
-                lines: element.lines
+                lines: element.lines // Przypisz istniejące linie
             });
-            // canvas.style.cursor = "crosshair"; // Zmień kursor na krzyżyk
+
+            // Synchronizuj checkboxy z liniami segmentu
+            // setSelectedLines(element);
+            // console.log(selectedLines)
+            // generateLineList(mapData, applyChanges, fetchMapData, showEditMenu);
+
             menu.remove(); // Zamknij menu edycji
-            console.log(mapData)
         }
     });
 

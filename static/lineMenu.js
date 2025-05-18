@@ -1,3 +1,5 @@
+import { selectedLines, setSelectedLines } from './script.js';
+
 export function generateLineList(mapData, applyChanges, fetchMapData, showEditMenu) {
     const lineList = document.getElementById("line-list");
     lineList.innerHTML = ""; // Wyczyść listę
@@ -7,13 +9,46 @@ export function generateLineList(mapData, applyChanges, fetchMapData, showEditMe
         return;
     }
 
-    // Generowanie listy linii
+    // Generowanie listy linii z checkboxami i możliwością edycji
     mapData.lines.forEach(line => {
         const listItem = document.createElement("li");
-        listItem.textContent = line.label || `Line ${line.id}`;
-        listItem.addEventListener("click", () => {
+        listItem.style.display = "flex";
+        listItem.style.alignItems = "center";
+        listItem.style.justifyContent = "space-between";
+        listItem.style.cursor = "pointer";
+
+        // Checkbox do zaznaczania linii
+        const checkbox = document.createElement("input");
+        checkbox.type = "checkbox";
+        checkbox.checked = selectedLines.includes(line.id); // Zaznacz, jeśli linia jest w `selectedLines`
+        // Odznacz checkbox, jeśli linia nie jest w `selectedLines`
+        checkbox.checked = selectedLines.includes(line.id);
+        checkbox.addEventListener("change", () => {
+            if (checkbox.checked) {
+                if (!selectedLines.includes(line.id)) {
+                    selectedLines.push(line.id); // Dodaj linię do selectedLines
+                }
+            } else {
+                const index = selectedLines.indexOf(line.id);
+                if (index !== -1) selectedLines.splice(index, 1); // Usuń linię z selectedLines
+            }
+            setSelectedLines([...selectedLines]); // Zaktualizuj globalną listę
+            console.log("Selected lines:", selectedLines);
+        });
+
+        // Label z nazwą linii
+        const label = document.createElement("span");
+        label.textContent = line.label || `Line ${line.id}`;
+        label.style.marginLeft = "10px";
+        label.style.flexGrow = "1";
+
+        // Kliknięcie w nazwę linii otwiera menu edycji
+        label.addEventListener("click", () => {
             showEditMenu("line", line, applyChanges, fetchMapData, mapData);
         });
+
+        listItem.appendChild(checkbox);
+        listItem.appendChild(label);
         lineList.appendChild(listItem);
     });
 
