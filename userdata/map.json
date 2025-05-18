@@ -66,7 +66,7 @@
     },
     {
       "id": "N1747575521682",
-      "label": "Stadion Narodowy",
+      "label": "Centrum Nauki Kopernik",
       "label_position": [
         10,
         10
@@ -130,7 +130,7 @@
     },
     {
       "id": "N1747575649225",
-      "label": "Dworzec Wileński",
+      "label": "Stadion Narodowy",
       "label_position": [
         10,
         10
@@ -154,6 +154,22 @@
       "label_text_degree": 45,
       "coordinates": [
         -11,
+        1
+      ],
+      "type": "standard_black",
+      "type_rotation": 90,
+      "size": 20
+    },
+    {
+      "id": "N1747575963601",
+      "label": "Dworzec Wileński",
+      "label_position": [
+        10,
+        10
+      ],
+      "label_text_degree": 45,
+      "coordinates": [
+        5,
         1
       ],
       "type": "standard_black",
@@ -385,6 +401,28 @@
       "lines": [
         "L142309497"
       ]
+    },
+    {
+      "id": "S1747575976745",
+      "start_node": "N1747575649225",
+      "end_node": "N1747575963601",
+      "route": [
+        [
+          3,
+          1
+        ],
+        [
+          4,
+          1
+        ],
+        [
+          5,
+          1
+        ]
+      ],
+      "lines": [
+        "L142309497"
+      ]
     }
   ],
   "lines": [
@@ -401,8 +439,64 @@
       "thickness": 20
     }
   ],
-  "rivers": [],
-  "icons": [],
+  "rivers": [
+    {
+      "id": "R1747575993679",
+      "label": "Wisła",
+      "route": [
+        [
+          2,
+          -1
+        ],
+        [
+          2,
+          0
+        ],
+        [
+          2,
+          1
+        ],
+        [
+          2,
+          2
+        ],
+        [
+          2,
+          3
+        ],
+        [
+          2,
+          4
+        ],
+        [
+          2,
+          5
+        ],
+        [
+          2,
+          5
+        ],
+        [
+          2,
+          5
+        ]
+      ],
+      "width": 20,
+      "color": "#66b5ff"
+    }
+  ],
+  "icons": [
+    {
+      "id": "N1747576051938",
+      "label": "New Icon",
+      "coordinates": [
+        6,
+        4
+      ],
+      "size": 30,
+      "icon": "/static/icons/stadium.svg"
+    }
+  ],
   "labels_size": 20,
   "labels_color": "#000000",
   "background_image": "/static/images/background.png"

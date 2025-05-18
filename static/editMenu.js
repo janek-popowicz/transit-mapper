@@ -46,42 +46,42 @@ export function showEditMenu(type, element, applyChanges, fetchMapData, mapData)
         <button id="save-node">Save</button>
     `;
     } else if (type === "segment") {
-        setSelectedLines([...element.lines]); // Prawidłowo - przekazujemy nową tablicę
-        generateLineList(mapData, applyChanges, fetchMapData, showEditMenu); // Odśwież listę linii z checkboxami
-        console.log("Clicking segment")
+        setSelectedLines([...element.lines]);
+        generateLineList(mapData, applyChanges, fetchMapData, showEditMenu);
 
         menu.innerHTML = `
-            <h3>Edit Segment</h3>
-            <label>ID: <input type="text" id="segment-id" value="${element.id || ''}" readonly></label><br>
-            <label>Start Node: <input type="text" id="segment-start-node" value="${element.start_node || ''}" readonly></label><br>
-            <label>End Node: <input type="text" id="segment-end-node" value="${element.end_node || ''}"></label><br>
-            <label>Lines: <input type="text" id="segment-lines" value="${element.lines.join(', ')}"></label><br>
-            <label>Route: <textarea id="segment-route">${element.route.map(coord => coord.join(', ')).join('; ')}</textarea></label><br>
-            <button id="change-edit-path">Change Edit Path</button>
-            <button id="remove-segment">Remove</button>
-            <button id="save-segment">Save</button>
+        <h3>Edit Segment</h3>
+        <label>ID: <input type="text" id="segment-id" value="${element.id || ''}" readonly></label><br>
+        <label>Start Node: <input type="text" id="segment-start-node" value="${element.start_node || ''}" readonly></label><br>
+        <label>End Node: <input type="text" id="segment-end-node" value="${element.end_node || ''}" readonly></label><br>
+        <label>Route: <textarea id="segment-route" readonly>${element.route.map(coord => coord.join(', ')).join('; ')}</textarea></label><br>
+        <label>Lines: <input type="text" id="segment-lines" value="${element.lines.join(', ')}" readonly>
+        <span style="display: block; color: #666; font-size: 0.8em;">Use checkboxes in the lines menu to modify lines</span></label><br>
+        <button id="change-edit-path">Change Edit Path</button>
+        <button id="remove-segment">Remove</button>
+        <button id="save-segment">Save</button>
+    `;
+    } else if (type === "river") {
+        menu.innerHTML = `
+            <h3>Edit River</h3>
+            <label>Label: <input type="text" id="river-label" value="${element.label || ''}"></label><br>
+            <label>Route: <textarea id="river-route" readonly>${element.route.map(coord => coord.join(', ')).join('; ')}</textarea></label><br>
+            <label>Width: <input type="number" id="river-width" value="${element.width || 0}"></label><br>
+            <label>Color: <input type="color" id="river-color" value="${element.color || '#000000'}"></label><br>
+            <button id="edit-river-path">Edit Path</button>
+            <button id="remove-river">Remove</button>
+            <button id="save-river">Save</button>
         `;
     } else if (type === "icon") {
         menu.innerHTML = `
             <h3>Edit Icon</h3>
             <label>Label: <input type="text" id="icon-label" value="${element.label || ''}"></label><br>
-            <label>Coordinates: <input type="text" id="icon-coordinates" value="${element.coordinates.join(', ')}"></label><br>
+            <label>Coordinates: <input type="text" id="icon-coordinates" value="${element.coordinates.join(', ')}" readonly></label><br>
             <label>Icon Path: <input type="text" id="icon-path" value="${element.icon || ''}"></label><br>
             <label>Size: <input type="number" id="icon-size" value="${element.size || 0}"></label><br>
             <button id="edit-icon-position">Edit Position</button>
-            <button id="remove-icon">Remove</button><br>
+            <button id="remove-icon">Remove</button>
             <button id="save-icon">Save</button>
-        `;
-    } else if (type === "river") {
-        menu.innerHTML = `
-            <h3>Edit River</h3>
-            <label>Label: <input type="text" id="river-label" value="${element.label || ''}"></label><br>
-            <label>Route: <textarea id="river-route">${element.route.map(coord => coord.join(', ')).join('; ')}</textarea></label><br>
-            <label>Width: <input type="number" id="river-width" value="${element.width || 0}"></label><br>
-            <label>Color: <input type="color" id="river-color" value="${element.color || '#000000'}"></label><br>
-            <button id="edit-river-path">Edit Path</button>
-            <button id="remove-river">Remove</button><br>
-            <button id="save-river">Save</button>
         `;
     } else if (type === "line") {
         menu.innerHTML = `
