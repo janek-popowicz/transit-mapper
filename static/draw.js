@@ -130,7 +130,9 @@ export function visualizeMap(data, ctx, canvas, offsetX = 0, offsetY = 0, scale 
 
         const x = centerX + icon.coordinates[0] * 50 * scale;
         const y = centerY - icon.coordinates[1] * 50 * scale; // oś Y jest odwrócona
-
+        if (icon.icon === "none") {
+            return; // Jeśli ikona to "none", pomiń rysowanie
+        }
         if (!iconCache[icon.icon]) {
             // Jeśli obraz nie jest jeszcze załadowany, załaduj go
             const img = new Image();

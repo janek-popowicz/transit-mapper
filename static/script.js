@@ -311,8 +311,8 @@ document.getElementById("add-station").addEventListener("click", () => {
     tempNode = {
         id: `N${Date.now()}`, // Tymczasowe ID
         label: "New Station",
-        label_position: [0, 0],
-        label_text_degree: 0,
+        label_position: [10, 10],
+        label_text_degree: 90,
         coordinates: [0, 0],
         type: "standard_black",
         size: 20
@@ -400,6 +400,11 @@ document.getElementById("add-segment").addEventListener("click", () => {
         route: [], // Punkty pośrednie
         lines: [] // Linie przypisane do segmentu
     };
+
+    // Pobierz zaznaczone linie z menu linii
+    const selectedLines = [];
+    generateLineList(mapData, applyChanges, fetchMapData, showEditMenu, selectedLines);
+
     canvas.style.cursor = "crosshair"; // Zmień kursor na krzyżyk
 });
 canvas.addEventListener("click", (e) => {
