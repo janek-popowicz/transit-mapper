@@ -276,53 +276,86 @@ export function visualizeMap(data, ctx, canvas, offsetX = 0, offsetY = 0, scale 
                 ctx.stroke();
                 break;
 
-            case "text":
-                const labels = node.label.split("|");
-                labels.reverse(); // Odwrócenie etykiet, aby były rysowane od dołu do góry
-            
-                // Ustal czcionkę na podstawie rozmiaru noda
-                const fontSize = Math.max(6, node.size * 0.6); // Skalowana czcionka
-                ctx.font = `${fontSize}px 'Courier New', monospace`;
-                ctx.textBaseline = "middle";
-                ctx.textAlign = "center";
-            
-                // Oblicz wymiary tła na podstawie najdłuższej etykiety
-                const maxLabel = labels.reduce((a, b) => a.length > b.length ? a : b, "");
-                const textMetrics = ctx.measureText(maxLabel);
-                const paddingX = fontSize * 0.2;
-                const paddingY = fontSize * 0.2;
-                const rectWidth = textMetrics.width + paddingX * 1.9;
-                const rectHeight = labels.length * fontSize + paddingY *1.9;
-            
-                // Rysuj zaokrąglony prostokąt w tle
-                const radius = 4;
-                const x = -rectWidth / 2;
-                const y = -rectHeight / 2;
-            
-                ctx.fillStyle = "white";
-                ctx.beginPath();
-                ctx.moveTo(x + radius, y);
-                ctx.lineTo(x + rectWidth - radius, y);
-                ctx.quadraticCurveTo(x + rectWidth, y, x + rectWidth, y + radius);
-                ctx.lineTo(x + rectWidth, y + rectHeight - radius);
-                ctx.quadraticCurveTo(x + rectWidth, y + rectHeight, x + rectWidth - radius, y + rectHeight);
-                ctx.lineTo(x + radius, y + rectHeight);
-                ctx.quadraticCurveTo(x, y + rectHeight, x, y + rectHeight - radius);
-                ctx.lineTo(x, y + radius);
-                ctx.quadraticCurveTo(x, y, x + radius, y);
-                ctx.closePath();
-                ctx.fill();
-            
-                // Rysuj tekst
-                ctx.fillStyle = "black";
-                ctx.save();
-                ctx.scale(1, -1); // Odwrócenie Y do poprawnego rysowania
-                labels.forEach((line, index) => {
-                    const lineY = y + paddingY + fontSize / 2 + index * fontSize;
-                    ctx.fillText(line, 0, -lineY);
-                });
-                ctx.restore();
-                break;
+case "text":
+    const rawGroups = node.label.split("||");
+
+    const lines = rawGroups.map(group => {
+        const parts = group.split("|");
+        let color = "black";
+        let offset = 0;
+        let content = "";
+
+        parts.forEach(part => {
+            if (part.startsWith("border:")) {
+                color = part.split(":")[1];
+            } else if (part.startsWith("offset:")) {
+                offset = parseFloat(part.split(":")[1]);
+            } else {
+                content = part;
+            }
+        });
+
+        return { text: content, borderColor: color, offset };
+    });
+
+    const fontSize = Math.max(6, node.size * 0.6);
+    ctx.font = `${fontSize}px 'Courier New', monospace`;
+    ctx.textBaseline = "middle";
+    ctx.textAlign = "center";
+
+    const paddingX = fontSize * 0.3;
+    const paddingY = fontSize * 0.2;
+    const spacing = fontSize * 0.2;
+
+    const widths = lines.map(line => ctx.measureText(line.text).width + paddingX * 2);
+    const heights = lines.map(() => fontSize + paddingY * 2);
+    const boxWidth = Math.max(...widths);
+
+    ctx.save();
+
+    //ctx.rotate(rotation);
+    ctx.scale(1, -1); // odwracamy Y żeby było zgodne z układem canvas
+
+    lines.forEach((line, i) => {
+        // oblicz y (po osi tekstu) – klasyczny układ
+        const baseY = -(
+            (i * (heights[i] + spacing)) -
+            (lines.length - 1) * (heights[i] + spacing) / 2
+        ) - heights[i] / 2;
+
+        // x jest offsetem – w osi prostopadłej (czyli lokalnej X)
+        const offsetX = line.offset;
+
+        const x = -boxWidth / 2 + offsetX;
+        const y = baseY;
+
+        // Tło z ramką
+        ctx.fillStyle = "white";
+        ctx.strokeStyle = line.borderColor;
+        ctx.lineWidth = 1.5;
+
+        const radius = 4;
+        ctx.beginPath();
+        ctx.moveTo(x + radius, y);
+        ctx.lineTo(x + boxWidth - radius, y);
+        ctx.quadraticCurveTo(x + boxWidth, y, x + boxWidth, y + radius);
+        ctx.lineTo(x + boxWidth, y + heights[i] - radius);
+        ctx.quadraticCurveTo(x + boxWidth, y + heights[i], x + boxWidth - radius, y + heights[i]);
+        ctx.lineTo(x + radius, y + heights[i]);
+        ctx.quadraticCurveTo(x, y + heights[i], x, y + heights[i] - radius);
+        ctx.lineTo(x, y + radius);
+        ctx.quadraticCurveTo(x, y, x + radius, y);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+
+        // Tekst
+        ctx.fillStyle = "black";
+        ctx.fillText(line.text, offsetX, y + heights[i] / 2);
+    });
+
+    ctx.restore();
+    break;
 
             case "invisible":
                 // do nothing
