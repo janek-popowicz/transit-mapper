@@ -315,6 +315,7 @@ document.getElementById("add-station").addEventListener("click", () => {
         label_text_degree: 90,
         coordinates: [0, 0],
         type: "standard_black",
+        type_rotation: 90,
         size: 20
     };
     canvas.style.cursor = "crosshair"; // Zmień kursor na krzyżyk
@@ -494,13 +495,15 @@ document.addEventListener("keydown", (e) => {
 
 // Funkcja do aktualizacji segmentów po zmianie węzła
 function updateSegmentsForNode(node) {
-    // Zaktualizuj segmenty, które mają ten węzeł jako start_node
     mapData.segments.forEach(segment => {
         if (segment.start_node === node.id) {
-            segment.route[0] = [...node.coordinates]; // Zaktualizuj pierwsze współrzędne
+            // Jeśli węzeł jest start_node, aktualizuj pierwszy punkt trasy
+            segment.route[0] = [...node.coordinates];
         }
-        if (segment.end_node === node.id) {
-            segment.route[segment.route.length - 1] = [...node.coordinates]; // Zaktualizuj ostatnie współrzędne
+        else if (segment.end_node === node.id) {
+            // Jeśli węzeł jest end_node, aktualizuj ostatni punkt trasy
+            segment.route[segment.route.length - 1] = [...node.coordinates];
+            
         }
     });
 }

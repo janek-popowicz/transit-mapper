@@ -13,17 +13,38 @@ export function showEditMenu(type, element, applyChanges, fetchMapData, mapData)
     // Generowanie zawartości menu w zależności od typu
     if (type === "node") {
         menu.innerHTML = `
-            <h3>Edit Node</h3>
-            <label>ID: <input type="text" id="node-id" value="${element.id || ''}" readonly></label><br>
-            <label>Label: <input type="text" id="node-label" value="${element.label || ''}"></label><br>
-            <label>Label Position: <input type="text" id="node-label-position" value="${element.label_position.join(', ')}"></label><br>
-            <label>Label text rotation: <input type="number" id="node-label-text-degree" value="${element.label_text_degree || 90}"></label><br>
-            <label>Type: <input type="text" id="node-type" value="${element.type || ''}"></label><br>
-            <label>Size: <input type="number" id="node-size" value="${element.size || 0}"></label><br>
-            <button id="edit-node-position">Edit Position</button>
-            <button id="remove-node">Remove</button>
-            <button id="save-node">Save</button>
-        `;
+        <h3>Edit Node</h3>
+        <label>ID: <input type="text" id="node-id" value="${element.id || ''}" readonly></label><br>
+        <label>Label: <input type="text" id="node-label" value="${element.label || ''}"></label><br>
+        <label>Label Position: 
+            <div style="display: flex; gap: 6px; margin-top: 5px;">
+                <div>
+                    <label style="display: block; font-size: 0.8em;">X:</label>
+                    <input type="number" id="node-label-position-x" value="${element.label_position[0]}" style="width: 60px;">
+                </div>
+                <div>
+                    <label style="display: block; font-size: 0.8em;">Y:</label>
+                    <input type="number" id="node-label-position-y" value="${element.label_position[1]}" style="width: 60px;">
+                </div>
+            </div>
+        </label><br>
+        <label>Label text rotation: <input type="number" id="node-label-text-degree" value="${element.label_text_degree || 0}" step="45"></label><br>
+        <label>Type: 
+            <select id="node-type">
+                <option value="standard_black" ${element.type === 'standard_black' ? 'selected' : ''}>Standard Black</option>
+                <option value="standard_white" ${element.type === 'standard_white' ? 'selected' : ''}>Standard White</option>
+                <option value="text" ${element.type === 'text' ? 'selected' : ''}>Text</option>
+                <option value="onedirectional_black" ${element.type === 'onedirectional_black' ? 'selected' : ''}>Onedirectional Black</option>
+                <option value="onedirectional_white" ${element.type === 'onedirectional_white' ? 'selected' : ''}>Onedirectional White</option>
+                <option value="invisible" ${element.type === 'invisible' ? 'selected' : ''}>Invisible</option>
+            </select>
+        </label><br>
+        <label>Type Rotation: <input type="number" id="node-type-rotation" value="${element.type_rotation || 0}" step="45"></label><br>
+        <label>Size: <input type="number" id="node-size" value="${element.size || 0}"></label><br>
+        <button id="edit-node-position">Edit Position</button>
+        <button id="remove-node">Remove</button>
+        <button id="save-node">Save</button>
+    `;
     } else if (type === "segment") {
         setSelectedLines([...element.lines]); // Prawidłowo - przekazujemy nową tablicę
         generateLineList(mapData, applyChanges, fetchMapData, showEditMenu); // Odśwież listę linii z checkboxami
@@ -105,9 +126,13 @@ export function showEditMenu(type, element, applyChanges, fetchMapData, mapData)
     menu.querySelector("#save-" + type).addEventListener("click", () => {
         if (type === "node") {
             element.label = menu.querySelector("#node-label").value;
-            element.label_position = menu.querySelector("#node-label-position").value.split(',').map(Number);
+            element.label_position = [
+                parseFloat(menu.querySelector("#node-label-position-x").value),
+                parseFloat(menu.querySelector("#node-label-position-y").value)
+            ];
             element.label_text_degree = parseInt(menu.querySelector("#node-label-text-degree").value, 10);
             element.type = menu.querySelector("#node-type").value;
+            element.type_rotation = parseInt(menu.querySelector("#node-type-rotation").value, 10); // Dodane
             element.size = parseInt(menu.querySelector("#node-size").value, 10);
 
             // Zaktualizuj współrzędne węzła
