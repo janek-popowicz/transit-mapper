@@ -92,21 +92,22 @@ function drawGrid(ctx, data, cellSize = 50, color = "#e0e0e0") {
     ctx.restore();
 }
 
-export function visualizeMap(data, ctx, canvas, offsetX = 0, offsetY = 0, scale = 1) {
-  //  console.log(data)
+export function visualizeMap(data, ctx, canvas, offsetX = 0, offsetY = 0, scale = 1, skipGrid = false) {
     // Wyczyszczenie canvas
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     // Skala mapy (dostosowanie współrzędnych do rozmiaru canvas)
-    const centerX = canvas.width / 2 + offsetX; // Uwzględnienie przesunięcia
+    const centerX = canvas.width / 2 + offsetX;
     const centerY = canvas.height / 2 + offsetY;
 
-    // Odwrócenie osi Y
     ctx.save();
     ctx.translate(centerX, centerY);
-    ctx.scale(scale, -scale); // Uwzględnienie skali i odwrócenie osi Y
+    ctx.scale(scale, -scale);
 
-    drawGrid(ctx, data);
+    // Rysuj grid tylko jeśli skipGrid jest false
+    if (!skipGrid) {
+        drawGrid(ctx, data);
+    }
 
 
     // 1. Rysowanie rzek

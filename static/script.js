@@ -4,6 +4,7 @@ import { getMapCoordinatesFromClick } from './clickHandlers.js';
 import { showEditMenu } from './editMenu.js';
 import { generateLineList } from './lineMenu.js';
 import { uploadMap, downloadMap, loadInitialMapData, uploadIcon } from './importexport.js';
+import { exportToFormat } from './export.js';
 
 export let mapData = null; // Eksportuj mapData
 
@@ -684,4 +685,12 @@ document.addEventListener("keydown", (e) => {
         canvas.style.cursor = "default";
         fetchMapData(); // Odśwież mapę, aby usunąć tymczasową ikonę
     }
+});
+
+document.getElementById("export-png").addEventListener("click", () => {
+    exportToFormat(mapData, 'png');
+});
+
+document.getElementById("export-svg").addEventListener("click", () => {
+    exportToFormat(mapData, 'svg');
 });
