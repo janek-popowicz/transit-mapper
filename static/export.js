@@ -2,50 +2,59 @@ import { visualizeMap } from './draw.js';
 
 function exportToFormat(mapData, format) {
     if (format === 'png') {
-        // 1. Pokaż dialog do wprowadzenia współrzędnych
         const coordinates = prompt(
             "Podaj współrzędne prostokąta do eksportu w formacie:\n" +
             "x1,y1,x2,y2\n" +
             "gdzie (x1,y1) to lewy dolny róg, a (x2,y2) to prawy górny róg",
-            "-10,10,10,-10" // Domyślne wartości
+            "-10,10,10,-10"
         );
 
         if (!coordinates) return;
-
-        // 2. Parsuj współrzędne
         const [x1, y1, x2, y2] = coordinates.split(',').map(Number);
         
-        // 3. Oblicz wymiary eksportu w pikselach
-        const width = Math.abs(x2 - x1) * 50;
-        const height = Math.abs(y2 - y1) * 50;
+        const scaleFactor = 4;
+        const width = Math.abs(x2 - x1) * 50 * scaleFactor;
+        const height = Math.abs(y2 - y1) * 50 * scaleFactor;
 
-        // 4. Stwórz tymczasowy canvas o odpowiednim rozmiarze
-        const tempCanvas = document.createElement('canvas');
-        tempCanvas.width = width;
-        tempCanvas.height = height;
-        const tempCtx = tempCanvas.getContext('2d');
+        // Tworzymy dwa canvas'y - jeden dla tła, drugi dla mapy
+        const backgroundCanvas = document.createElement('canvas');
+        backgroundCanvas.width = width;
+        backgroundCanvas.height = height;
+        const bgCtx = backgroundCanvas.getContext('2d');
 
-        // 5. Wypełnij tło na biało
-        tempCtx.fillStyle = '#FFFFFF';
-        tempCtx.fillRect(0, 0, width, height);
+        const mapCanvas = document.createElement('canvas');
+        mapCanvas.width = width;
+        mapCanvas.height = height;
+        const mapCtx = mapCanvas.getContext('2d');
 
-        // 6. Oblicz przesunięcie do środka wybranego obszaru
+        // Rysujemy białe tło
+        bgCtx.fillStyle = '#FFFFFF';
+        bgCtx.fillRect(0, 0, width, height);
+
+        // Rysujemy mapę z transformacjami
+        mapCtx.save();
+        mapCtx.scale(scaleFactor, scaleFactor);
+
         const centerX = -(x1 + x2) * 25;
         const centerY = (y1 + y2) * 25;
 
-        // 7. Narysuj mapę z odpowiednim przesunięciem
         visualizeMap(
             mapData,
-            tempCtx,
-            {width, height},
+            mapCtx,
+            {width: width/scaleFactor, height: height/scaleFactor},
             centerX,
             centerY,
             1,
-            true // skipGrid
+            true
         );
 
-        // 8. Eksportuj do PNG
-        const dataUrl = tempCanvas.toDataURL('image/png');
+        mapCtx.restore();
+
+        // Łączymy oba canvas'y
+        bgCtx.drawImage(mapCanvas, 0, 0);
+
+        // Eksportujemy połączony rezultat
+        const dataUrl = backgroundCanvas.toDataURL('image/png');
         downloadFile(dataUrl, 'transit-map.png');
     }
 }
