@@ -687,10 +687,50 @@ document.addEventListener("keydown", (e) => {
     }
 });
 
+let isSelectingExportArea = false;
+let exportAreaStart = null;
+let exportAreaEnd = null;
+let exportAreaRect = null;
+
 document.getElementById("export-png").addEventListener("click", () => {
-    exportToFormat(mapData, 'png');
+    isSelectingExportArea = true;
+    canvas.style.cursor = "crosshair";
 });
 
-document.getElementById("export-svg").addEventListener("click", () => {
-    exportToFormat(mapData, 'svg');
-});
+// Zmiana: obsługa mousedown podczas exportu
+canvas.addEventListener('click', (e) => {
+    if (!isSelectingExportArea) return;
+
+    const [mapX, mapY] = getMapCoordinatesFromClick(e, canvas, offsetX, offsetY, scale);
+    
+    if (!exportAreaStart) {
+        exportAreaStart = [mapX, mapY];
+    } else {
+        exportAreaEnd = [mapX, mapY];
+        canvas.style.cursor = 'default';
+        exportAreaRect = [
+            Math.min(exportAreaStart[0], exportAreaEnd[0]),
+            Math.min(exportAreaStart[1], exportAreaEnd[1]),
+            Math.max(exportAreaStart[0], exportAreaEnd[0]),
+            Math.max(exportAreaStart[1], exportAreaEnd[1])
+        ];
+
+        exportToFormat(mapData, 'png', exportAreaRect);
+
+        isSelectingExportArea = false;
+        exportAreaStart = null;
+        exportAreaEnd = null;
+        exportAreaRect = null;
+        canvas.style.cursor = 'default';
+    }
+})
+
+canvas.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && isSelectingExportArea) {
+        isSelectingExportArea = false;
+        exportAreaStart = null;
+        exportAreaEnd = null;
+        exportAreaRect = null;
+        canvas.style.cursor = 'default';
+    }
+})

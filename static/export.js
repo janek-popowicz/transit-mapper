@@ -1,16 +1,11 @@
 import { visualizeMap } from './draw.js';
 
-function exportToFormat(mapData, format) {
+function exportToFormat(mapData, format, area_coords) {
     if (format === 'png') {
-        const coordinates = prompt(
-            "Podaj współrzędne prostokąta do eksportu w formacie:\n" +
-            "x1,y1,x2,y2\n" +
-            "gdzie (x1,y1) to lewy dolny róg, a (x2,y2) to prawy górny róg",
-            "-10,10,10,-10"
-        );
-
-        if (!coordinates) return;
-        const [x1, y1, x2, y2] = coordinates.split(',').map(Number);
+        if (!area_coords || !Array.isArray(area_coords)) return;
+        
+        // Destrukturyzacja tablicy koordynatów
+        const [x1, y1, x2, y2] = area_coords;
         
         const scaleFactor = 4;
         const width = Math.abs(x2 - x1) * 50 * scaleFactor;
