@@ -37,6 +37,20 @@ let offsetX = 0; // Przesunięcie mapy w osi X
 let offsetY = 0; // Przesunięcie mapy w osi Y
 let scale = 1; // Początkowa skala mapy
 
+
+// Dodaj na początku pliku lub w sekcji inicjalizacji
+window.addEventListener('beforeunload', (e) => {
+    // Anuluj domyślne zachowanie
+    e.preventDefault();
+    
+    // Chrome wymaga przypisania returnValue
+    e.returnValue = '';
+    
+    // Tekst nie będzie wyświetlany w większości nowoczesnych przeglądarek
+    // ze względów bezpieczeństwa - zamiast tego pokazują standardowy komunikat
+    return 'Be sure you saved the map.';
+});
+
 // Debounce do fetchMapData
 let fetchTimeout = null;
 function debounceFetchMapData() {
@@ -804,3 +818,4 @@ document.addEventListener('keydown', (e) => {
         fetchMapData(); // Odśwież mapę aby usunąć prostokąt
     }
 })
+
