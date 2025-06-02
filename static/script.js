@@ -701,7 +701,9 @@ document.getElementById("export-png").addEventListener("click", () => {
 canvas.addEventListener('click', (e) => {
     if (!isSelectingExportArea) return;
 
-    const [mapX, mapY] = getMapCoordinatesFromClick(e, canvas, offsetX, offsetY, scale);
+    const [rawX, rawY] = getMapCoordinatesFromClick(e, canvas, offsetX, offsetY, scale);
+    const mapX = Math.round(rawX);
+    const mapY = Math.round(rawY);
     
     if (!exportAreaStart) {
         exportAreaStart = [mapX, mapY];
@@ -722,15 +724,83 @@ canvas.addEventListener('click', (e) => {
         exportAreaEnd = null;
         exportAreaRect = null;
         canvas.style.cursor = 'default';
+        fetchMapData(); // Odśwież mapę aby usunąć prostokąt
     }
 })
 
-canvas.addEventListener('keydown', (e) => {
+canvas.addEventListener("mousemove", (e) => {
+    if (!isSelectingExportArea) return;
+    
+    const [mapX, mapY] = getMapCoordinatesFromClick(e, canvas, offsetX, offsetY, scale);
+    
+    // Przyciąganie do całkowitych współrzędnych
+    const snappedX = Math.round(mapX);
+    const snappedY = Math.round(mapY);
+    
+
+    // Odśwież mapę
+    fetchMapData();
+    
+    if (exportAreaStart) {
+        // Rysuj prostokąt od punktu początkowego do aktualnej pozycji
+        ctx.save();
+        ctx.strokeStyle = '#ff0000';
+        ctx.lineWidth = 2;
+        ctx.setLineDash([5, 5]); // Przerywana linia
+        
+        const startScreenX = exportAreaStart[0] * 50 * scale + canvas.width / 2 + offsetX;
+        const startScreenY = -(exportAreaStart[1] * 50 * scale - canvas.height / 2 - offsetY);
+        const currentScreenX = snappedX * 50 * scale + canvas.width / 2 + offsetX;
+        const currentScreenY = -(snappedY * 50 * scale - canvas.height / 2 - offsetY);
+        
+        ctx.beginPath();
+        ctx.rect(
+            Math.min(startScreenX, currentScreenX),
+            Math.min(startScreenY, currentScreenY),
+            Math.abs(currentScreenX - startScreenX),
+            Math.abs(currentScreenY - startScreenY)
+        );
+        ctx.stroke();
+        ctx.restore();
+    }
+});
+
+// // ...existing code...
+// canvas.addEventListener('click', (e) => {
+//     if (!isSelectingExportArea) return;
+
+//     const [mapX, mapY] = getMapCoordinatesFromClick(e, canvas, offsetX, offsetY, scale);
+    
+//     if (!exportAreaStart) {
+//         exportAreaStart = [mapX, mapY];
+//     } else {
+//         exportAreaEnd = [mapX, mapY];
+//         canvas.style.cursor = 'default';
+//         exportAreaRect = [
+//             Math.min(exportAreaStart[0], exportAreaEnd[0]),
+//             Math.min(exportAreaStart[1], exportAreaEnd[1]),
+//             Math.max(exportAreaStart[0], exportAreaEnd[0]),
+//             Math.max(exportAreaStart[1], exportAreaEnd[1])
+//         ];
+
+//         exportToFormat(mapData, 'png', exportAreaRect);
+
+//         isSelectingExportArea = false;
+//         exportAreaStart = null;
+//         exportAreaEnd = null;
+//         exportAreaRect = null;
+//         canvas.style.cursor = 'default';
+//         fetchMapData(); // Odśwież mapę aby usunąć prostokąt
+//     }
+// });
+document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape' && isSelectingExportArea) {
+        console.log("Anulowano wybór obszaru eksportu");
         isSelectingExportArea = false;
         exportAreaStart = null;
         exportAreaEnd = null;
         exportAreaRect = null;
         canvas.style.cursor = 'default';
+        fetchMapData(); // Odśwież mapę aby usunąć prostokąt
     }
 })
